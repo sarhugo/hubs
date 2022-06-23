@@ -32,3 +32,5 @@ import "./audio-zone-source";
 import "./troika-text";
 import "./frustrum";
 import "./inject-main-camera-here";
+
+import "./earth-globe";

@@ -617,3 +617,15 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, componentName, componentData) => {
+  el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
+  el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+  el.setAttribute("tags", {
+    // The interaction system will set it's held state to this object
+    isHoldable: true,
+    holdableButton: true
+  }); // This makes the object hoverable by your hands in VR
+  el.setAttribute("body-helper", { type: TYPE.KINEMATIC }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
+  el.setAttribute(componentName, componentData);
+});
