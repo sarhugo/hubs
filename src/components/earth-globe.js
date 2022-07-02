@@ -1,7 +1,11 @@
 import { THREE } from "aframe";
-import { Vector3 } from "three";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
+const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
+const TARGET_WORLD_QUATERNION = new THREE.Quaternion();
+const v = new THREE.Vector3();
+const v2 = new THREE.Vector3();
+const q = new THREE.Quaternion();
 const GLOBE_RADIUS = 1;
 const pxPerDeg = (2 * Math.PI * GLOBE_RADIUS) / 360;
 
@@ -100,21 +104,20 @@ AFRAME.registerComponent("earth-globe", {
       leftHand = document.getElementById("player-left-controller");
       rightHand = document.getElementById("player-right-controller");
     });
+
+    const transformSystem = this.el.sceneEl.systems["earth-globe-movement"];
     this.onGrabStart = e => {
       if (!leftHand || !rightHand) return;
-      const transformSystem = this.el.sceneEl.systems["transform-selected-object"];
       transformSystem.startTransform(
         this.el.object3D,
         e.object3D.el.id === "right-cursor"
           ? rightHand.object3D
           : e.object3D.el.id === "left-cursor"
             ? leftHand.object3D
-            : e.object3D,
-        { mode: "axis", axis: new Vector3(0, 1, 0) }
+            : e.object3D
       );
     };
     this.onGrabEnd = () => {
-      const transformSystem = this.el.sceneEl.systems["transform-selected-object"];
       transformSystem.stopTransform();
     };
   },
@@ -159,5 +162,136 @@ AFRAME.registerComponent("earth-globe", {
     point.updateMatrix();
     point.material = this._pointMaterials[location.type];
     this.el.object3D.add(point);
+  }
+});
+
+AFRAME.registerSystem("earth-globe-movement", {
+  init() {
+    this.target = null;
+    this.transforming = false;
+    this.startQ = new THREE.Quaternion();
+
+    this.raycasters = {};
+
+    this.planarInfo = {
+      plane: new THREE.Mesh(
+        new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
+        new THREE.MeshBasicMaterial({
+          visible: true,
+          wireframe: true,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.3
+        })
+      ),
+      normal: new THREE.Vector3(),
+      intersections: [],
+      previousPointOnPlane: new THREE.Vector3(),
+      currentPointOnPlane: new THREE.Vector3(),
+      deltaOnPlane: new THREE.Vector3(),
+      finalProjectedVec: new THREE.Vector3()
+    };
+    this.el.object3D.add(this.planarInfo.plane);
+  },
+
+  stopTransform() {
+    this.transforming = false;
+  },
+
+  startPlaneCasting() {
+    let intersection;
+    const { plane, previousPointOnPlane } = this.planarInfo;
+
+    this.el.camera.getWorldQuaternion(CAMERA_WORLD_QUATERNION);
+    plane.quaternion.copy(CAMERA_WORLD_QUATERNION);
+    this.target.getWorldPosition(plane.position);
+    plane.matrixNeedsUpdate = true;
+    plane.updateMatrixWorld(true);
+
+    if ((intersection = this.getIntersection())) {
+      this.transforming = true;
+      previousPointOnPlane.copy(intersection.point);
+      this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
+      v.set(0, 0, -1).applyQuaternion(CAMERA_WORLD_QUATERNION);
+      v2.set(0, 0, -1).applyQuaternion(TARGET_WORLD_QUATERNION);
+      this.sign = v.dot(v2) > 0 ? 1 : -1;
+
+      v.set(0, 1, 0);
+      v2.set(0, 1, 0).applyQuaternion(TARGET_WORLD_QUATERNION);
+      this.sign2 = v.dot(v2) > 0 ? 1 : -1;
+    } else {
+      this.transforming = false;
+    }
+  },
+
+  startTransform(target, hand) {
+    this.target = target;
+    this.hand = hand;
+    this.transforming = true;
+    this.target.getWorldQuaternion(this.startQ);
+    this.startPlaneCasting();
+  },
+  tick() {
+    if (!this.target) {
+      return;
+    }
+    if (!this.transforming) {
+      this.target.rotation.x -= this.target.rotation.x * 0.05;
+      this.target.rotation.y -= this.target.rotation.y * 0.05;
+      this.target.matrixNeedsUpdate = true;
+      return;
+    }
+    let intersection;
+    const {
+      plane,
+      normal,
+      previousPointOnPlane,
+      currentPointOnPlane,
+      deltaOnPlane,
+      finalProjectedVec
+    } = this.planarInfo;
+    this.target.getWorldPosition(plane.position);
+    this.el.camera.getWorldPosition(v);
+    plane.matrixNeedsUpdate = true;
+    const cameraToPlaneDistance = v.sub(plane.position).length();
+
+    if ((intersection = this.getIntersection())) {
+      normal.set(0, 0, -1).applyQuaternion(plane.quaternion);
+
+      currentPointOnPlane.copy(intersection.point);
+      deltaOnPlane.copy(currentPointOnPlane).sub(previousPointOnPlane);
+      const SENSITIVITY = 5;
+      finalProjectedVec
+        .copy(deltaOnPlane)
+        .projectOnPlane(normal)
+        .applyQuaternion(q.copy(plane.quaternion).invert())
+        .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
+
+      this.target.rotation.x = THREE.MathUtils.clamp(
+        this.target.rotation.x - this.sign2 * this.sign * finalProjectedVec.y,
+        -Math.PI / 2,
+        Math.PI / 2
+      );
+      this.target.rotation.y += finalProjectedVec.x;
+
+      this.target.matrixNeedsUpdate = true;
+
+      previousPointOnPlane.copy(currentPointOnPlane);
+    }
+  },
+  getIntersection() {
+    const intersections = [];
+    this.raycasters.right =
+      this.raycasters.right ||
+      document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
+    this.raycasters.left =
+      this.raycasters.left ||
+      document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
+    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    this.planarInfo.plane.raycast(raycaster, intersections);
+    raycaster.far = far;
+    return intersections.length ? intersections[0] : false;
   }
 });
