@@ -629,3 +629,5 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
   el.setAttribute("body-helper", { type: TYPE.KINEMATIC }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("time-capsule", "time-capsule");
