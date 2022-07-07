@@ -132,6 +132,9 @@ AFRAME.registerComponent("earth-globe", {
     this.el.object3D.removeEventListener("holdable-button-up", this.onGrabEnd);
   },
   loadLocations() {
+    if (!this.data.jsonUrl) {
+      return;
+    }
     this._baseGeometry = new THREE.BufferGeometry();
     this._pointGeometry = new THREE.CylinderBufferGeometry(1, 1, 1, 12);
     this._pointGeometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
@@ -177,7 +180,7 @@ AFRAME.registerSystem("earth-globe-movement", {
       plane: new THREE.Mesh(
         new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
         new THREE.MeshBasicMaterial({
-          visible: true,
+          visible: false,
           wireframe: true,
           side: THREE.DoubleSide,
           transparent: true,
