@@ -18,8 +18,9 @@ AFRAME.registerComponent("time-capsule", {
       this.initHoverMenu();
       this.loadScreen().then(model => {
         this.videoEl.mesh.geometry = model.scene.children[0].geometry;
-        this.videoEl.mesh.position.y = 0.5;
-        this.videoEl.mesh.position.z = -0.5;
+        this.videoEl.mesh.position.y = 0.33;
+        this.videoEl.mesh.position.z = -0.48;
+        this.videoEl.mesh.scale.y = 1.1565;
         this.videoEl.mesh.material.needsUpdate = true;
       });
     });
