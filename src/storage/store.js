@@ -24,7 +24,7 @@ const defaultMaterialQuality = (function() {
     if (qsMobileDefault && MATERIAL_QUALITY_OPTIONS.indexOf(qsMobileDefault) !== -1) {
       return qsMobileDefault;
     }
-    return "low";
+    return AFRAME.utils.device.isMobileVR() ? "high" : "low";
   }
 
   const qsDefault = qsGet("default_material_quality");
