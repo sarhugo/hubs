@@ -100,7 +100,7 @@ export const SCHEMA = {
         preferredMic: { type: "string", default: NO_DEVICE_ID },
         preferredSpeakers: { type: "string", default: NO_DEVICE_ID },
         preferredCamera: { type: "string", default: NO_DEVICE_ID },
-        muteMicOnEntry: { type: "bool", default: false },
+        muteMicOnEntry: { type: "bool", default: true },
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
         invertTouchscreenCameraMove: { type: "bool", default: true },
