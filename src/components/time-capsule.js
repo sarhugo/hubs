@@ -76,10 +76,10 @@ AFRAME.registerComponent("time-capsule", {
     this.videoEl.togglePlaying();
   },
   tick() {
-    if (!this.videoEl) return;
+    if (!this.videoEl || !this.hoverMenu) return;
     const paused = !this.videoEl.video || this.videoEl.video.paused;
     this.playPauseButton.setAttribute("icon-button", "active", paused);
-    if (this.hoverMenu && this.hoverMenu.object3D.visible) {
+    if (this.hoverMenu.object3D.visible) {
       this.updateHoverMenu();
     }
   },
