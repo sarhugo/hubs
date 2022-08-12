@@ -133,7 +133,7 @@ AFRAME.registerComponent("time-capsule", {
     }
     return loadModel(timeCapsuleUrl).then(model => {
       timeCapsuleModel = model;
-      screen = model.scene.children[1];
+      screen = model.scene.children.find(o => o.name === "Screen");
       return timeCapsuleModel;
     });
   },
