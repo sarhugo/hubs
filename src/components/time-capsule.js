@@ -1,27 +1,25 @@
-import screenUrl from "../assets/time-capsule/screen.glb";
 import timeCapsuleUrl from "../assets/time-capsule/time-capsule.glb";
 import { loadModel } from "./gltf-model-plus";
 import { VOLUME_LABELS } from "./media-video";
 
-let screenModel = null;
 let timeCapsuleModel = null;
+let screen = null;
 const MAX_GAIN_MULTIPLIER = 2;
 
 AFRAME.registerComponent("time-capsule", {
+  schema: {
+    jsonUrl: { type: "string" }
+  },
   init() {
     this.loadChapters();
-    this.loadCapsule().then(model => {
-      this.el.object3D.add(model.scene);
-    });
     this.el.addEventListener("video-loaded", () => {
-      this.videoEl = this.el.components["media-video"];
-      this.initHoverMenu();
-      this.loadScreen().then(model => {
-        this.videoEl.mesh.geometry = model.scene.children[0].geometry;
-        this.videoEl.mesh.position.y = 0.33;
-        this.videoEl.mesh.position.z = -0.48;
-        this.videoEl.mesh.scale.y = 1.1565;
-        this.videoEl.mesh.material.needsUpdate = true;
+      this.loadCapsule().then(model => {
+        this.el.object3D.add(model.scene);
+        this.videoEl = this.el.components["media-video"];
+        this.initHoverMenu();
+        this.videoEl.mesh.visible = false;
+        screen.material = this.videoEl.mesh.material;
+        screen.material.needsUpdate = true;
       });
     });
   },
@@ -129,21 +127,13 @@ AFRAME.registerComponent("time-capsule", {
   updateTimeLabel(chapter) {
     this.timeLabel.setAttribute("text", "value", this.chapters[chapter].title);
   },
-  loadScreen() {
-    if (screenModel) {
-      return Promise.resolve(screenModel);
-    }
-    return loadModel(screenUrl).then(model => {
-      screenModel = model;
-      return screenModel;
-    });
-  },
   loadCapsule() {
     if (timeCapsuleModel) {
       return Promise.resolve(timeCapsuleModel);
     }
     return loadModel(timeCapsuleUrl).then(model => {
       timeCapsuleModel = model;
+      screen = model.scene.children[1];
       return timeCapsuleModel;
     });
   },
