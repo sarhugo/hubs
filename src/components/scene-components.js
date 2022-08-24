@@ -35,3 +35,4 @@ import "./inject-main-camera-here";
 
 import "./earth-globe";
 import "./time-capsule";
+import "./video-switcher";
