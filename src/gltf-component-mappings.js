@@ -616,16 +616,34 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
   el.setAttribute(componentName, componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, componentName, componentData) => {
-  el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
-  el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, componentName, componentData, components, indexToEntityMap) => {
+  const { text } = componentData;
+
+  let targetEntity;
+
+  try {
+    // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
+    if (typeof target === "number") {
+      targetEntity = indexToEntityMap[text];
+    } else {
+      targetEntity = text?.el;
+    }
+
+    if (!targetEntity) {
+      throw new Error(`Couldn't find target entity with index: ${text}.`);
+    }
+  } catch (e) {
+    console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
+    return;
+  }
+
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("tags", {
-    // The interaction system will set it's held state to this object
     isHoldable: true,
     holdableButton: true
-  }); // This makes the object hoverable by your hands in VR
-  el.setAttribute("body-helper", { type: TYPE.KINEMATIC }); // This registers a kinematic body with the physics system so you we can detect collisions with your hands
-  el.setAttribute(componentName, componentData);
+  });
+  el.setAttribute(componentName, { ...componentData, text: targetEntity });
 });
 
 AFRAME.GLTFModelPlus.registerComponent("time-capsule", "time-capsule");
@@ -650,7 +668,7 @@ AFRAME.GLTFModelPlus.registerComponent(
         throw new Error(`Couldn't find target entity with index: ${target}.`);
       }
     } catch (e) {
-      console.warn(`Error inflating gltf component "video-switcher": ${e.message}`);
+      console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
       return;
     }
 

@@ -1,4 +1,6 @@
 import { THREE } from "aframe";
+import { ConicPolygonGeometry } from 'three-conic-polygon-geometry';
+import GeoJson from "../assets/earth-globe/ne_110m_admin_0_countries.json";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 const CAMERA_WORLD_QUATERNION = new THREE.Quaternion();
@@ -6,165 +8,137 @@ const TARGET_WORLD_QUATERNION = new THREE.Quaternion();
 const v = new THREE.Vector3();
 const v2 = new THREE.Vector3();
 const q = new THREE.Quaternion();
-const GLOBE_RADIUS = 1;
-const pxPerDeg = (2 * Math.PI * GLOBE_RADIUS) / 360;
+const q2 = new THREE.Quaternion();
 
-const colorFn = x => {
-  return new THREE.Color().setHSL(0.6 - x * 0.5, 1.0, 0.5);
-};
-const fragmentShader = `
-uniform vec3 color;
-uniform float coefficient;
-uniform float power;
-varying vec3 vVertexNormal;
-varying vec3 vVertexWorldPosition;
-void main() {
-  vec3 worldCameraToVertex = vVertexWorldPosition - cameraPosition;
-  vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;
-  viewCameraToVertex = normalize(viewCameraToVertex);
-  float intensity	= pow(
-    coefficient + dot(vVertexNormal, viewCameraToVertex),
-    power
-  );
-  gl_FragColor = vec4(color, intensity);
-}`;
-
-const vertexShader = `
-varying vec3 vVertexWorldPosition;
-varying vec3 vVertexNormal;
-void main() {
-  vVertexNormal	= normalize(normalMatrix * normal);
-  vVertexWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-  gl_Position	= projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+class CountryTile extends THREE.Object3D {
+  constructor(geometry, materials, data) {
+    super();
+    this.userData = data;
+    const magnitude = data?.magnitude || 0;
+    const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
+    polygons.forEach(coords => {
+      const mesh = new THREE.Mesh(
+        new ConicPolygonGeometry(coords, .5, 3 + magnitude * .1, true, true, true, 5),
+        materials
+      );
+      this.add(mesh);
+    });
+  }
 }
-`;
-const createAtmosphereMesh = (geometry, options) => {
-  const atmosphereGeometry = geometry.clone();
 
-  // Resize vertex positions according to normals
-  const position = new Float32Array(geometry.attributes.position.count * 3);
-  for (let idx = 0, len = position.length; idx < len; idx++) {
-    const normal = geometry.attributes.normal.array[idx];
-    const curPos = geometry.attributes.position.array[idx];
-    position[idx] = curPos + normal * options.size;
-  }
-  atmosphereGeometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
-  const atmosphereMaterial = new THREE.ShaderMaterial({
-    depthWrite: false,
-    fragmentShader,
-    transparent: true,
-    uniforms: {
-      coefficient: {
-        value: options.coefficient
-      },
-      color: {
-        value: new THREE.Color(options.color)
-      },
-      power: {
-        value: options.power
-      }
-    },
-    vertexShader
-  });
-  if (options.backside) {
-    atmosphereMaterial.side = THREE.BackSide;
-  }
-  return new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-};
-const getRandomAltitude = () => {
-  return Math.floor(Math.random() * 33) / 100;
-};
 AFRAME.registerComponent("earth-globe", {
   schema: {
-    bumpMap: { type: "string", default: "" },
-    jsonUrl: { type: "string", default: "" }
+    src: { type: "string" },
+    text: { type: "selector" },
+    sideColor: { type: "color" },
+    sideColorOpacity: { type: "number", default: 1 },
+    bottomCapColor: { type: "color" },
+    bottomCapColorOpacity: { type: "number", default: 1 },
+    topCapColor: { type: "color" },
+    topCapColorOpacity: { type: "number", default: 1 },
+    activeSideColor: { type: "color" },
+    activeSideColorOpacity: { type: "number", default: 1 },
+    activeBottomCapColor: { type: "color" },
+    activeBottomCapColorOpacity: { type: "number", default: 1 },
+    activeTopCapColor: { type: "color" },
+    activeTopCapColorOpacity: { type: "number", default: 1 },
   },
   init() {
-    const { mesh } = this.el.object3DMap;
-    mesh.rotation.y = Math.PI;
-    if (this.data.bumpMap) {
-      const loader = new THREE.TextureLoader();
-      loader.loadAsync(this.data.bumpMap).then(texture => {
-        mesh.material.bumpMap = texture;
-        mesh.material.bumpScale = 0.05;
-        mesh.material.needsUpdate = true;
-      });
-    }
-    const atmosphere = createAtmosphereMesh(mesh.geometry, {
-      backside: true,
-      color: "lightskyblue",
-      size: GLOBE_RADIUS * 0.25,
-      power: 3.5,
-      coefficient: 0.1
-    });
-    this.el.object3D.add(atmosphere);
+    this.initEventHandlers();
+    this.initMaterials();
+    this.initLocations()
+      .then(() => this.generateGlobe());
+  },
+  initEventHandlers() {
     let leftHand, rightHand;
-    this.loadLocations();
     waitForDOMContentLoaded().then(() => {
       leftHand = document.getElementById("player-left-controller");
       rightHand = document.getElementById("player-right-controller");
     });
-
+    
     const transformSystem = this.el.sceneEl.systems["earth-globe-movement"];
     this.onGrabStart = e => {
       if (!leftHand || !rightHand) return;
       transformSystem.startTransform(
         this.el.object3D,
         e.object3D.el.id === "right-cursor"
-          ? rightHand.object3D
-          : e.object3D.el.id === "left-cursor"
-            ? leftHand.object3D
-            : e.object3D
+        ? rightHand.object3D
+        : e.object3D.el.id === "left-cursor"
+        ? leftHand.object3D
+        : e.object3D
       );
     };
     this.onGrabEnd = () => {
       transformSystem.stopTransform();
+    };
+    this.showCountryDetails = e => {
+      let number;
+      const locations = [];
+      const { active, title, office, automat, officeWithAutomat } = e.object3D.userData;
+      if (!active) {
+        this.el.setAttribute("text", "value", "");
+        return;
+      }
+      if (office || officeWithAutomat) {
+        number = (office || 0) + (officeWithAutomat || 0);
+        locations.push(`${number} office${number > 1 ? 's' : ''}`);
+      }
+      if (automat || officeWithAutomat) {
+        number = (automat || 0) + (officeWithAutomat || 0);
+        locations.push(`${number} ATM${number > 1 ? 's' : ''}`);
+      }
+      this.data.text.setAttribute("text", "value", `${title}:\n${locations.join(" - ")}`);
     };
   },
   play() {
     this.el.object3D.addEventListener("interact", this.onGrabStart);
     this.el.object3D.addEventListener("holdable-button-down", this.onGrabStart);
     this.el.object3D.addEventListener("holdable-button-up", this.onGrabEnd);
+    this.el.object3D.addEventListener("country-interact", this.showCountryDetails);
   },
   pause() {
     this.el.object3D.removeEventListener("interact", this.onGrabStart);
     this.el.object3D.removeEventListener("holdable-button-down", this.onGrabStart);
     this.el.object3D.removeEventListener("holdable-button-up", this.onGrabEnd);
+    this.el.object3D.removeEventListener("country-interact", this.showCountryDetails);
   },
-  loadLocations() {
-    if (!this.data.jsonUrl) {
+  initMaterials() {
+    this.materials = [
+      new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: this.data.sideColor, opacity: this.data.sideColorOpacity, transparent: this.data.sideColorOpacity < 1 }), // side material
+      new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: this.data.bottomCapColor, opacity: this.data.bottomCapColorOpacity, transparent: this.data.bottomCapColorOpacity < 1 }), // bottom cap material
+      new THREE.MeshBasicMaterial({ color: this.data.topCapColor, opacity: this.data.topCapColorOpacity, transparent: this.data.topCapColorOpacity < 1 }), // top cap material
+      new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: this.data.activeSideColor, opacity: this.data.activeSideColorOpacity, transparent: this.data.activeSideColorOpacity < 1 }), // active side material
+      new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: this.data.activeBottomCapColor, opacity: this.data.activeBottomCapColorOpacity, transparent: this.data.activeBottomCapColorOpacity < 1 }), // active bottom cap material
+      new THREE.MeshBasicMaterial({ color: this.data.activeTopCapColor, opacity: this.data.activeTopCapColorOpacity, transparent: this.data.activeTopCapColorOpacity < 1}) // active top cap material
+    ];
+  },
+  initLocations() {
+    this.locations = {};
+    if (!this.data.src) {
       return;
     }
-    this._baseGeometry = new THREE.BufferGeometry();
-    this._pointGeometry = new THREE.CylinderBufferGeometry(1, 1, 1, 12);
-    this._pointGeometry.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-    this._pointGeometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -0.5));
-    this._pointMaterials = {
-      automat: new THREE.MeshBasicMaterial({ color: colorFn(0.9) }),
-      office: new THREE.MeshBasicMaterial({ color: colorFn(0.3) }),
-      officeWithAutomat: new THREE.MeshBasicMaterial({ color: colorFn(0.6) })
-    };
-    fetch(this.data.jsonUrl)
+    return fetch(this.data.src)
       .then(response => response.json())
-      .then(locations => {
-        locations.forEach(location => {
-          this.addLocation(location);
+      .then(countries => {
+        const max = Math.max(...countries.map(country => country.locations));
+        countries.forEach((country) => {
+          this.locations[country.code] = {
+            ...country,
+            magnitude: country.locations / max
+          };
         });
       });
   },
-  addLocation(location) {
-    const point = new THREE.Mesh(this._pointGeometry);
-    const phi = ((90 - location.latitude) * Math.PI) / 180;
-    const theta = ((180 - location.longitude) * Math.PI) / 180;
-    point.position.x = GLOBE_RADIUS * Math.sin(phi) * Math.cos(theta);
-    point.position.y = GLOBE_RADIUS * Math.cos(phi);
-    point.position.z = GLOBE_RADIUS * Math.sin(phi) * Math.sin(theta);
-    point.lookAt(new THREE.Vector3(0, 0, 0));
-    point.scale.x = point.scale.y = 0.25 * pxPerDeg;
-    point.scale.z = Math.max(getRandomAltitude() * GLOBE_RADIUS, 0.1);
-    point.updateMatrix();
-    point.material = this._pointMaterials[location.type];
-    this.el.object3D.add(point);
+  generateGlobe() {
+    GeoJson.features.forEach(({ properties, geometry }) => {
+      const countryCode = properties.ISO_A2;
+      const materials = this.locations[countryCode] ? this.materials.slice(3) : this.materials.slice(0, 3);
+      this.el.object3D.add(new CountryTile(geometry, materials, {
+        title: properties.NAME,
+        active: this.locations[countryCode],
+        ...this.locations[countryCode]
+      }));
+    });
   }
 });
 
@@ -172,8 +146,6 @@ AFRAME.registerSystem("earth-globe-movement", {
   init() {
     this.target = null;
     this.transforming = false;
-    this.startQ = new THREE.Quaternion();
-
     this.raycasters = {};
 
     this.planarInfo = {
@@ -202,8 +174,7 @@ AFRAME.registerSystem("earth-globe-movement", {
   },
 
   startPlaneCasting() {
-    let intersection;
-    const { plane, previousPointOnPlane } = this.planarInfo;
+    const { plane, intersections, previousPointOnPlane } = this.planarInfo;
 
     this.el.camera.getWorldQuaternion(CAMERA_WORLD_QUATERNION);
     plane.quaternion.copy(CAMERA_WORLD_QUATERNION);
@@ -211,9 +182,9 @@ AFRAME.registerSystem("earth-globe-movement", {
     plane.matrixNeedsUpdate = true;
     plane.updateMatrixWorld(true);
 
-    if ((intersection = this.getIntersection())) {
+    if (this.hasIntersection()) {
       this.transforming = true;
-      previousPointOnPlane.copy(intersection.point);
+      previousPointOnPlane.copy(intersections[0].point);
       this.target.getWorldQuaternion(TARGET_WORLD_QUATERNION);
       v.set(0, 0, -1).applyQuaternion(CAMERA_WORLD_QUATERNION);
       v2.set(0, 0, -1).applyQuaternion(TARGET_WORLD_QUATERNION);
@@ -231,7 +202,7 @@ AFRAME.registerSystem("earth-globe-movement", {
     this.target = target;
     this.hand = hand;
     this.transforming = true;
-    this.target.getWorldQuaternion(this.startQ);
+    this.checkClickedCountry();
     this.startPlaneCasting();
   },
   tick() {
@@ -239,15 +210,15 @@ AFRAME.registerSystem("earth-globe-movement", {
       return;
     }
     if (!this.transforming) {
-      this.target.rotation.x -= this.target.rotation.x * 0.05;
-      this.target.rotation.y -= this.target.rotation.y * 0.05;
+      this.target.rotation.x -= this.target.rotation.x * 0.0005;
+      this.target.rotation.y -= this.target.rotation.y * 0.0005;
       this.target.matrixNeedsUpdate = true;
       return;
     }
-    let intersection;
     const {
       plane,
       normal,
+      intersections,
       previousPointOnPlane,
       currentPointOnPlane,
       deltaOnPlane,
@@ -258,10 +229,10 @@ AFRAME.registerSystem("earth-globe-movement", {
     plane.matrixNeedsUpdate = true;
     const cameraToPlaneDistance = v.sub(plane.position).length();
 
-    if ((intersection = this.getIntersection())) {
+    if (this.hasIntersection()) {
       normal.set(0, 0, -1).applyQuaternion(plane.quaternion);
 
-      currentPointOnPlane.copy(intersection.point);
+      currentPointOnPlane.copy(intersections[0].point);
       deltaOnPlane.copy(currentPointOnPlane).sub(previousPointOnPlane);
       const SENSITIVITY = 5;
       finalProjectedVec
@@ -270,31 +241,47 @@ AFRAME.registerSystem("earth-globe-movement", {
         .applyQuaternion(q.copy(plane.quaternion).invert())
         .multiplyScalar(SENSITIVITY / cameraToPlaneDistance);
 
-      this.target.rotation.x = THREE.MathUtils.clamp(
-        this.target.rotation.x - this.sign2 * this.sign * finalProjectedVec.y,
-        -Math.PI / 2,
-        Math.PI / 2
-      );
-      this.target.rotation.y += finalProjectedVec.x;
+      v.set(1, 0, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+      q.setFromAxisAngle(v, -finalProjectedVec.y);
+
+      v.set(0, 1, 0).applyQuaternion(CAMERA_WORLD_QUATERNION);
+      q2.setFromAxisAngle(v, finalProjectedVec.x);
+
+      this.target.quaternion.premultiply(q).premultiply(q2);
+
+      this.target.rotation.z = THREE.MathUtils.clamp(this.target.rotation.z, -Math.PI / 2, Math.PI / 2);
 
       this.target.matrixNeedsUpdate = true;
 
       previousPointOnPlane.copy(currentPointOnPlane);
     }
   },
-  getIntersection() {
-    const intersections = [];
+  hasIntersection() {
+    const { plane, intersections } = this.planarInfo;
+    intersections.length = 0;
+    const raycaster = this.getRaycaster();
+    const far = raycaster.far;
+    raycaster.far = 1000;
+    plane.raycast(raycaster, intersections);
+    raycaster.far = far;
+    return !!intersections[0];
+  },
+  checkClickedCountry() {
+    const intersections = this.getRaycaster().intersectObjects(this.target.children);
+    if (intersections.length && intersections[0].object.parent instanceof CountryTile) {
+      this.target.dispatchEvent({
+        type: "country-interact",
+        object3D: intersections[0].object.parent
+      });
+    }
+  },
+  getRaycaster() {
     this.raycasters.right =
       this.raycasters.right ||
       document.getElementById("right-cursor-controller").components["cursor-controller"].raycaster;
     this.raycasters.left =
       this.raycasters.left ||
       document.getElementById("left-cursor-controller").components["cursor-controller"].raycaster;
-    const raycaster = this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
-    const far = raycaster.far;
-    raycaster.far = 1000;
-    this.planarInfo.plane.raycast(raycaster, intersections);
-    raycaster.far = far;
-    return intersections.length ? intersections[0] : false;
+    return this.hand.el.id === "player-left-controller" ? this.raycasters.left : this.raycasters.right;
   }
 });
