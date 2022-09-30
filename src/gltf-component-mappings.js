@@ -684,3 +684,5 @@ AFRAME.GLTFModelPlus.registerComponent(
 );
 
 AFRAME.GLTFModelPlus.registerComponent("time-capsule", "time-capsule");
+
+AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");

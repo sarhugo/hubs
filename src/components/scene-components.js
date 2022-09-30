@@ -37,3 +37,4 @@ import "./inject-main-camera-here";
 import "./earth-globe";
 import "./video-switcher";
 import "./time-capsule";
+import "./pipezania";
