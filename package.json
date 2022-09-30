@@ -135,6 +135,7 @@
     "semver": "^7.3.2",
     "three": "github:mozillareality/three.js#d96f3cf69c7303db807cabaa2acba09d648e5e96",
     "three-ammo": "github:mozillareality/three-ammo",
+    "three-conic-polygon-geometry": "^1.5.2",
     "three-mesh-bvh": "^0.3.7",
     "three-pathfinding": "^1.1.0",
     "three-to-ammo": "github:infinitelee/three-to-ammo",
