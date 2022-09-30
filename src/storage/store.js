@@ -26,7 +26,7 @@ const defaultMaterialQuality = (function() {
     if (qsMobileDefault && MATERIAL_QUALITY_OPTIONS.indexOf(qsMobileDefault) !== -1) {
       return qsMobileDefault;
     }
-    return "low";
+    return AFRAME.utils.device.isMobileVR() ? "high" : "low";
   }
 
   const qsDefault = qsGet("default_material_quality");
@@ -115,7 +115,7 @@ export const SCHEMA = {
         preferredMic: { type: "string", default: NO_DEVICE_ID },
         preferredSpeakers: { type: "string", default: NO_DEVICE_ID },
         preferredCamera: { type: "string", default: NO_DEVICE_ID },
-        muteMicOnEntry: { type: "bool", default: false },
+        muteMicOnEntry: { type: "bool", default: true },
         disableLeftRightPanning: { type: "bool", default: false },
         audioNormalization: { type: "bool", default: 0.0 },
         invertTouchscreenCameraMove: { type: "bool", default: true },
@@ -126,7 +126,7 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool", default: false },
         allowMultipleHubsInstances: { type: "bool", default: false },
         disableIdleDetection: { type: "bool", default: false },
-        fastRoomSwitching: { type: "bool", default: false },
+        fastRoomSwitching: { type: "bool", default: true },
         lazyLoadSceneMedia: { type: "bool", default: false },
         preferMobileObjectInfoPanel: { type: "bool", default: false },
         // if unset, maxResolution = screen resolution
