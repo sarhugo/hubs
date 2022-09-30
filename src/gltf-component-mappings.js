@@ -682,3 +682,5 @@ AFRAME.GLTFModelPlus.registerComponent(
     });
   }
 );
+
+AFRAME.GLTFModelPlus.registerComponent("time-capsule", "time-capsule");
