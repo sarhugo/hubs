@@ -35,3 +35,4 @@ import "./frustrum";
 import "./inject-main-camera-here";
 
 import "./earth-globe";
+import "./video-switcher";
