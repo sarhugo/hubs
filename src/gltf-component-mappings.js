@@ -615,3 +615,5 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");
