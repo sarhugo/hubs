@@ -1,7 +1,8 @@
 import PIPES_SPRITE from "../assets/pipezania/pipes.png";
 import LEVELS from "../assets/pipezania/levels.json";
 
-import { SOUND_PIPEZANIA_SPIN, SOUND_PIPEZANIA_FAIL, SOUND_PIPEZANIA_SUCCESS } from "../systems/sound-effects-system";
+import { injectCustomShaderChunks } from "../utils/media-utils";
+import { SOUND_MEDIA_LOADING, SOUND_PIPEZANIA_SPIN, SOUND_PIPEZANIA_FAIL, SOUND_PIPEZANIA_SUCCESS } from "../systems/sound-effects-system";
 
 const PIPE_TILES = {
   CORNER: 0,
@@ -309,11 +310,14 @@ AFRAME.registerComponent("pipezania", {
           }
           this.el.appendChild(tile);
           tile.setAttribute("pipezania-tile", { kind, angle: piece[1], x: j, y: i });
-          tile.setAttribute("class", "interactable");
-          tile.setAttribute("is-remote-hover-target", "");
-          tile.setAttribute("tags", {
-            singleActionButton: true
-          });
+          if (kind !== PIPE_TILES.END) {
+            tile.setAttribute("class", "interactable");
+            tile.setAttribute("is-remote-hover-target", "");
+            tile.setAttribute("hoverable-visuals", "");
+            tile.setAttribute("tags", {
+              singleActionButton: true
+            });
+          }
           tile.object3D.position.set(j - this.center.x, this.center.y - i, 0.001);
           this.board[i * cols + j] = tile;
         }
@@ -335,6 +339,11 @@ AFRAME.registerComponent("pipezania", {
     this.currentPiece = tile;
     this.flow_delta = 0;
     this.flow_direction = tile.flow();
+    this.flow_sound_effect = this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playPositionalSoundFollowing(
+      SOUND_MEDIA_LOADING,
+      this.atom.object3D,
+      true
+    );
   },
   tick(t, dt) {
     if (this.isFlowing && !this.finished) {
@@ -378,12 +387,20 @@ AFRAME.registerComponent("pipezania", {
       return this.flood();
     }
   },
+  stopFlow() {
+    if (this.flow_sound_effect) {
+      this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.stopPositionalAudio(this.flow_sound_effect);
+      this.flow_sound_effect = null;
+    }
+  },
   flood() {
+    this.stopFlow();
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_FAIL);
     this.resetAtom();
     this.isFlowing = false;
   },
   success() {
+    this.stopFlow();
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_SUCCESS);
     this.finished = true;
   }
@@ -430,6 +447,24 @@ AFRAME.registerComponent("pipezania-tile", {
       }
     };
   },
+  updateHoverableVisuals: (function() {
+    const boundingBox = new THREE.Box3();
+    const boundingSphere = new THREE.Sphere();
+    return function() {
+      const hoverableVisuals = this.el.components["hoverable-visuals"];
+
+      if (hoverableVisuals) {
+        if (!this.injectedCustomShaderChunks) {
+          this.injectedCustomShaderChunks = true;
+          hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
+        }
+
+        boundingBox.setFromObject(this.el.object3DMap.mesh);
+        boundingBox.getBoundingSphere(boundingSphere);
+        hoverableVisuals.geometryRadius = boundingSphere.radius / this.el.object3D.scale.y;
+      }
+    };
+  })(),
   flow(entry) {
     return this.pipe.flow(entry);
   },
@@ -442,6 +477,7 @@ AFRAME.registerComponent("pipezania-tile", {
   },
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
+    this.updateHoverableVisuals();
   },
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
