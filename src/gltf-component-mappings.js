@@ -672,6 +672,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
+    el.setAttribute("hoverable-visuals", "");
     el.setAttribute("tags", {
       singleActionButton: true
     });
