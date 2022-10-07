@@ -1,32 +1,29 @@
 import { injectCustomShaderChunks } from "../utils/media-utils";
 
-AFRAME.registerComponent("time-capsule", {
+AFRAME.registerComponent("video-screen", {
+  schema: {
+    target: { type: "selector" },
+  },
+  init() {
+    this.data.target.addEventListener("video-loaded", () => {
+      const video = this.data.target.components["media-video"]
+      video.el.object3D.visible = false;
+      this.el.object3DMap.mesh.material = video.mesh.material;
+      this.el.object3DMap.mesh.material.needsUpdate = true;
+    }, { once: true })
+  },
+});
+AFRAME.registerComponent("video-chapters", {
   schema: {
     src: { type: "string" }
   },
   init() {
-    const screen = this.el.object3DMap.mesh;
-    this.loadChapters().then(() => {
-      this.el.emit("time-capsule-loaded");
-    });
     this.el.addEventListener("video-loaded", () => {
       this.videoEl = this.el.components["media-video"];
-      this.videoEl.el.classList.remove("interactable")
-      this.videoEl.el.removeAttribute("hover-menu__video");
-      this.videoEl.el.removeAttribute("is-remote-hover-target");
-      this.videoEl.el.removeAttribute("hoverable-visuals");
-      this.el.setObject3D("mesh", screen);
-      screen.material = this.videoEl.mesh.material;
-      screen.material.needsUpdate = true;
-    }, { once: true });
-  },
-
-  togglePlaying() {
-    this.videoEl?.togglePlaying();
-  },
-
-  isPaused() {
-    return !this.videoEl || this.videoEl.video.paused;
+    });
+    this.loadChapters().then(() => {
+      this.el.emit("video-chapters-loaded");
+    });
   },
 
   hasNext() {
@@ -79,37 +76,41 @@ AFRAME.registerComponent("time-capsule", {
   }
 });
 
-AFRAME.registerComponent("time-capsule-button", {
+AFRAME.registerComponent("video-control", {
   schema: {
     type: { type: "string" },
     target: { type: "selector" },
     chapter: { type: "int" },
+    src: { type: "string" }
   },
   init() {
-    this.data.target.addEventListener("time-capsule-loaded", () => {
-      this.timeCapsule = this.data.target.components["time-capsule"]
-      this.updateHoverableVisuals();
+    this.data.target.addEventListener("video-loaded", () => {
+      this.video = this.data.target.components["media-video"]
     }, { once: true })
+    this.data.target.addEventListener("video-chapters-loaded", () => {
+      this.chapters = this.data.target.components["video-chapters"]
+    }, { once: true })
+    this.updateHoverableVisuals();
+
     this.onClick = () => {
-      if (this.timeCapsule) {
-        switch (this.data.type) {
-          case "play":
-          case "pause":
-            this.timeCapsule.togglePlaying()
-            break
-          case "next":
-            this.timeCapsule.nextChapter()
-            break
-          case "previous":
-            this.timeCapsule.previousChapter()
-            break
-          case "chapter":
-            this.timeCapsule.seekChapter(this.data.chapter)
-            break
-        }
+      switch (this.data.type) {
+        case "play":
+        case "pause":
+          this.video?.togglePlaying();
+          break
+        case "next":
+          this.chapters?.nextChapter()
+          break
+        case "previous":
+          this.chapters?.previousChapter()
+          break
+        case "chapter":
+          this.chapters?.seekChapter(this.data.chapter)
+          break
       }
     }
   },
+
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
   },
@@ -121,18 +122,32 @@ AFRAME.registerComponent("time-capsule-button", {
   tick() {
     switch (this.data.type) {
       case "play":
-        this.el.object3D.visible = this.timeCapsule && this.timeCapsule.isPaused();
+        this.el.object3D.visible = this.video && this.video.video.paused;
         break;
       case "pause":
-        this.el.object3D.visible = this.timeCapsule && !this.timeCapsule.isPaused();
+        this.el.object3D.visible = this.video && !this.video.video.paused;
         break
       case "next":
-        this.el.object3D.visible = this.timeCapsule && this.timeCapsule.hasNext()
+        this.el.object3D.visible = this.chapters && this.chapters.hasNext()
         break
       case "previous":
-        this.el.object3D.visible = this.timeCapsule && this.timeCapsule.hasPrevious()
+        this.el.object3D.visible = this.chapters && this.chapters.hasPrevious()
+        break
+      case "chapter":
+        this.toggleChapterIndicator(this.chapters?.getCurrentChapter() === this.data.chapter);
         break
     }
+  },
+  toggleChapterIndicator(status) {
+    if (this.chapterStatus === status) {
+      return;
+    }
+    if (this.el.object3DMap.mesh.children.length) {
+      this.el.object3DMap.mesh.children.forEach((child) => {
+        child.visible = status;
+      })
+    }
+    this.chapterStatus = status;
   },
   updateHoverableVisuals: (function() {
     const boundingBox = new THREE.Box3();
@@ -145,7 +160,6 @@ AFRAME.registerComponent("time-capsule-button", {
           this.injectedCustomShaderChunks = true;
           hoverableVisuals.uniforms = injectCustomShaderChunks(this.el.object3D);
         }
-
         boundingBox.setFromObject(this.el.object3DMap.mesh);
         boundingBox.getBoundingSphere(boundingSphere);
         hoverableVisuals.geometryRadius = boundingSphere.radius / this.el.object3D.scale.y;
