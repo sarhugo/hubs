@@ -11,7 +11,8 @@ export const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "Mes
  */
 AFRAME.registerComponent("hoverable-visuals", {
   schema: {
-    enableSweepingEffect: { type: "boolean", default: true }
+    enableSweepingEffect: { type: "boolean", default: true },
+    force: { type: "boolean", default: false }
   },
   init() {
     // uniforms and boundingSphere are set from the component responsible for loading the mesh.
@@ -32,7 +33,7 @@ AFRAME.registerComponent("hoverable-visuals", {
     if (!this.uniforms || !this.uniforms.length) return;
 
     const isFrozen = this.el.sceneEl.is("frozen");
-    const showEffect = showHoverEffect(this.el);
+    const showEffect = showHoverEffect(this.el) || this.data.force;
     const toggling = this.el.sceneEl.systems["hubs-systems"].cursorTogglingSystem;
 
     let interactorOne, interactorTwo;
