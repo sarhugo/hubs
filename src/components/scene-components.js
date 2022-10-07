@@ -34,4 +34,4 @@ import "./troika-text";
 import "./frustrum";
 import "./inject-main-camera-here";
 
-import "./time-capsule";
+import "./video-addons";
