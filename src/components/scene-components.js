@@ -38,3 +38,4 @@ import "./earth-globe";
 import "./video-switcher";
 import "./pipezania";
 import "./video-addons";
+import "./information-panel";
