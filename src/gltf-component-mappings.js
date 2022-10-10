@@ -615,3 +615,18 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "rotation-loop",
+  "rotation-loop",
+  (el, componentName, componentData) => {
+    const to = { x: 0, y: 0, z: 0 }
+    to[componentData.axis] = 360
+    el.setAttribute("animation", {
+      property: "rotation",
+      to,
+      loop: true,
+      easing: "linear",
+      dur: componentData.speed * 1000
+    })
+  });
