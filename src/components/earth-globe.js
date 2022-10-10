@@ -30,6 +30,7 @@ AFRAME.registerComponent("earth-globe", {
   schema: {
     src: { type: "string" },
     text: { type: "selector" },
+    showMagnitude: { type: "boolean", default: false },
     sideColor: { type: "color" },
     sideColorOpacity: { type: "number", default: 1 },
     bottomCapColor: { type: "color" },
@@ -120,13 +121,19 @@ AFRAME.registerComponent("earth-globe", {
     return fetch(this.data.src)
       .then(response => response.json())
       .then(countries => {
-        const max = Math.max(...countries.map(country => country.locations));
-        countries.forEach((country) => {
-          this.locations[country.code] = {
-            ...country,
-            magnitude: country.locations / max
-          };
-        });
+        if (this.data.showMagnitude) {
+          const max = Math.max(...countries.map(country => country.locations));
+          countries.forEach((country) => {
+            this.locations[country.code] = {
+              ...country,
+              magnitude: country.locations / max
+            };
+          });
+        } else {
+          countries.forEach((country) => {
+            this.locations[country.code] = country;
+          });
+        }
       });
   },
   generateGlobe() {
