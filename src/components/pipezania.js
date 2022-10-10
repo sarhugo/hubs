@@ -2,6 +2,7 @@ import PIPES_SPRITE from "../assets/pipezania/pipes.png";
 import LEVELS from "../assets/pipezania/levels.json";
 
 import { injectCustomShaderChunks } from "../utils/media-utils";
+import { spawnEmojiInFrontOfUser, emojis } from "./emoji";
 import { SOUND_MEDIA_LOADING, SOUND_PIPEZANIA_SPIN, SOUND_PIPEZANIA_FAIL, SOUND_PIPEZANIA_SUCCESS } from "../systems/sound-effects-system";
 
 const PIPE_TILES = {
@@ -402,6 +403,7 @@ AFRAME.registerComponent("pipezania", {
   success() {
     this.stopFlow();
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_SUCCESS);
+    spawnEmojiInFrontOfUser(emojis.find(emoji => emoji.id === "clap"));
     this.finished = true;
   }
 });
