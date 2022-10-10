@@ -35,7 +35,6 @@ import "./frustrum";
 import "./inject-main-camera-here";
 
 import "./earth-globe";
-import "./video-switcher";
 import "./pipezania";
 import "./video-addons";
 import "./information-panel";

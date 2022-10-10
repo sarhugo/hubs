@@ -638,44 +638,6 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
   el.setAttribute(componentName, { ...componentData, text: targetEntity });
 });
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "video-switcher",
-  "video-switcher",
-  (el, componentName, componentData, components, indexToEntityMap) => {
-    const { target, src } = componentData;
-
-    let targetEntity;
-
-    try {
-      // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-      if (typeof target === "number") {
-        targetEntity = indexToEntityMap[target];
-      } else {
-        targetEntity = target?.el;
-      }
-
-      if (!targetEntity) {
-        throw new Error(`Couldn't find target entity with index: ${target}.`);
-      }
-    } catch (e) {
-      console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
-      return;
-    }
-
-    el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
-    el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
-    el.setAttribute("hoverable-visuals", "");
-    el.setAttribute("tags", {
-      singleActionButton: true
-    });
-
-    el.setAttribute(componentName, {
-      target: targetEntity,
-      src
-    });
-  }
-);
-
 AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");
 
 function findVideoTarget(componentName, componentData, indexToEntityMap) {
