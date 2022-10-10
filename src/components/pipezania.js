@@ -261,7 +261,7 @@ AFRAME.registerComponent("pipezania", {
     level: { type: "int" }
   },
   init() {
-    this.level = this.data.level ? LEVELS[this.data.level] : LEVELS[Math.floor(Math.random() * LEVELS.length)];
+    this.level = this.data.level ? LEVELS[this.data.level - 1] : LEVELS[Math.floor(Math.random() * LEVELS.length)];
     this.board = {};
     this.isFlowing = false;
     const rows = this.getRows();
