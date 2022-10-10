@@ -740,3 +740,18 @@ AFRAME.GLTFModelPlus.registerComponent(
       target: targetEntity
     });
   });
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "rotation-loop",
+  "rotation-loop",
+  (el, componentName, componentData) => {
+    const to = { x: 0, y: 0, z: 0 }
+    to[componentData.axis] = 360
+    el.setAttribute("animation", {
+      property: "rotation",
+      to,
+      loop: true,
+      easing: "linear",
+      dur: componentData.speed * 1000
+    })
+  });
