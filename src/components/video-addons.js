@@ -107,6 +107,9 @@ AFRAME.registerComponent("video-control", {
         case "chapter":
           this.chapters?.seekChapter(this.data.chapter)
           break
+        case "src":
+          this.data.target.setAttribute("media-loader", "src", this.data.src);
+          break
       }
     }
   },
