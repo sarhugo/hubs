@@ -38,3 +38,4 @@ import "./earth-globe";
 import "./pipezania";
 import "./video-addons";
 import "./information-panel";
+import "./connect-pairs";

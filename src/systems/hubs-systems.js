@@ -50,6 +50,7 @@ import { physicsCompatSystem } from "./bit-physics";
 import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distances";
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
+import { connectPairsSystem } from "../bit-systems/connect-pairs";
 
 AFRAME.registerSystem("hubs-systems", {
   init() {
@@ -111,6 +112,7 @@ AFRAME.registerSystem("hubs-systems", {
 
     buttonSystems(world);
     constraintsSystem(world, systems.userinput);
+    connectPairsSystem(world, systems.userinput);
 
     // We run this earlier in the frame so things have a chance to override properties run by animations
     this.animationMixerSystem.tick(dt);

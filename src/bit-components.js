@@ -160,3 +160,11 @@ export const VideoMenu = defineComponent({
 export const AudioEmitter = defineComponent();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
+
+export const ConnectPairs = defineComponent({
+  pair: Types.ui32,
+  side: Types.ui32
+});
+ConnectPairs.side[$isStringType] = true;
+
+export const ConnectPairsInitialized = defineComponent();
