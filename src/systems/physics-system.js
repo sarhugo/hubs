@@ -339,4 +339,20 @@ export class PhysicsSystem {
   activateBody(uuid) {
     this.workerHelpers.activateBody(uuid);
   }
+
+  applyForceToBody(uuid, vec) {
+    this.workerHelpers.applyForceToBody(uuid, vec);
+  }
+  
+  applyImpulseToBody(uuid, vec) {
+    this.workerHelpers.applyImpulseToBody(uuid, vec);
+  }
+  
+  setLinearVelocity(uuid, vec) {
+    this.workerHelpers.setLinearVelocity(uuid, vec);
+  }
+  
+  setAngularVelocity(uuid, vec) {
+    this.workerHelpers.setAngularVelocity(uuid, vec);
+  }
 }

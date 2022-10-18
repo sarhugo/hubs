@@ -120,3 +120,11 @@ export const CameraTool = defineComponent({
   sndToggleRef: Types.eid
 });
 export const MyCameraTool = defineComponent();
+
+export const ConnectPairs = defineComponent({
+  pair: Types.ui32,
+  side: Types.ui32
+});
+ConnectPairs.side[$isStringType] = true;
+
+export const ConnectPairsInitialized = defineComponent();

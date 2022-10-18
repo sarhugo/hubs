@@ -22,6 +22,7 @@ AFRAME.registerComponent("body-helper", {
     linearSleepingThreshold: { default: 1.6 },
     angularSleepingThreshold: { default: 2.5 },
     angularFactor: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
+    linearFactor: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     activationState: {
       default: ACTIVATION_STATE.ACTIVE_TAG,
       oneOf: ACTIVATION_STATES
