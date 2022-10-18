@@ -607,3 +607,28 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, componentName, componentData) => {
+  if (!el.object3DMap.mesh && el.object3DMap.group) {
+    el.setObject3D("mesh", el.object3DMap.group.children[0]);
+  }
+  el.object3D.userData.originalPosition = new THREE.Vector3();
+  el.object3D.userData.originalPosition.copy(el.object3D.position);
+  el.object3D.position.set(-1000, -1000, -1000);
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("tags", {
+    isHoldable: true,
+    holdableButton: true
+  });
+  el.setAttribute("body-helper", {
+    type: TYPE.KINEMATIC,
+    gravity: new THREE.Vector3(0,0,0),
+    angularFactor: new THREE.Vector3(0,0,0),
+    linearFactor: new THREE.Vector3(0,1,1),
+    collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+    collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+  });
+  el.setAttribute("shape-helper", "");
+  el.setAttribute(componentName, componentData);
+});
