@@ -771,6 +771,8 @@ AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, co
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
   });
-  el.setAttribute("shape-helper", "");
+  el.setAttribute("shape-helper", {
+    margin: 0,
+  });
   el.setAttribute(componentName, componentData);
 });
