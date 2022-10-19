@@ -39,3 +39,4 @@ import "./pipezania";
 import "./video-addons";
 import "./information-panel";
 import "./connect-pairs";
+import "./room-link";
