@@ -607,3 +607,13 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("room-link", "room-link", (el, componentName, componentData) => {
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("hoverable-visuals", { force: true });
+  el.setAttribute(componentName, {
+    src: sanitizeUrl(componentData.src),
+    text: componentData.text
+  });
+});
