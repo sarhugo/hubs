@@ -168,3 +168,4 @@ export const ConnectPairs = defineComponent({
 ConnectPairs.side[$isStringType] = true;
 
 export const ConnectPairsInitialized = defineComponent();
+export const ConnectPairsConnected = defineComponent();
