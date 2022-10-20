@@ -25,6 +25,7 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
           defaultMessage: "Press the Q & E keys to turn left and right."
         })
       },
+      /*
       {
         heading: intl.formatMessage({ id: "loading-screen.heading.whats-new", defaultMessage: "What's New?" }),
         message: intl.formatMessage(
@@ -42,6 +43,7 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
           }
         )
       }
+      */
     ],
     [intl]
   );
