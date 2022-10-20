@@ -2,12 +2,8 @@ import { injectCustomShaderChunks } from "../utils/media-utils";
 import { SOUND_MEDIA_LOADED } from "../systems/sound-effects-system";
 
 AFRAME.registerComponent("portal", {
-  schema: {
-    src: { type: "string" }
-  },
   init() {
     this.initEventHandlers();
-    this.appendLink();
     this.updateHoverableVisuals();
   },
   initEventHandlers() {
@@ -23,12 +19,6 @@ AFRAME.registerComponent("portal", {
         to: `0 0 300`
       });
     }
-  },
-  appendLink() {
-    const link = document.createElement("a-entity");
-    link.setAttribute("link", { href: this.data.src });
-    link.setAttribute("position", "0 0.15 -300");
-    this.el.appendChild(link);
   },
   updateHoverableVisuals: (function() {
     const boundingBox = new THREE.Box3();

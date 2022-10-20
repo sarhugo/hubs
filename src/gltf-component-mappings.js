@@ -617,7 +617,5 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
     singleActionButton: true
   });
   
-  el.setAttribute(componentName, {
-    src: sanitizeUrl(componentData.src)
-  });
+  el.setAttribute(componentName, componentData);
 });
