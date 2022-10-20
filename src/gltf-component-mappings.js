@@ -607,3 +607,17 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+
+AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, componentData) => {
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("hoverable-visuals", { force: true });
+  el.setAttribute("tags", {
+    singleActionButton: true
+  });
+  
+  el.setAttribute(componentName, {
+    src: sanitizeUrl(componentData.src)
+  });
+});
