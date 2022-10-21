@@ -11,6 +11,9 @@ AFRAME.registerComponent("room-link", {
       isFlat: true
     });
     this.updateHoverableVisuals();
+    this.onClick = () => {
+      this.el.querySelector("[open-room-button").object3D.dispatchEvent({ type: "interact" });
+    }
   },
   updateHoverableVisuals: (function() {
     const boundingBox = new THREE.Box3();
@@ -31,4 +34,10 @@ AFRAME.registerComponent("room-link", {
       }
     };
   })(),
+  play() {
+    this.el.object3D.addEventListener("interact", this.onClick);
+  },
+  pause() {
+    this.el.object3D.removeEventListener("interact", this.onClick);
+  },
 })

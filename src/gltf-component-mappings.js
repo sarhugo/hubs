@@ -612,6 +612,9 @@ AFRAME.GLTFModelPlus.registerComponent("room-link", "room-link", (el, componentN
   el.setAttribute("class", "interactable");
   el.setAttribute("is-remote-hover-target", "");
   el.setAttribute("hoverable-visuals", { force: true });
+  el.setAttribute("tags", {
+    singleActionButton: true
+  });
   el.setAttribute(componentName, {
     src: sanitizeUrl(componentData.src),
     text: componentData.text
