@@ -635,7 +635,7 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
     isHoldable: true,
     holdableButton: true
   });
-  el.setAttribute(componentName, { ...componentData, text: targetEntity });
+  el.setAttribute(componentName, { ...componentData, src: sanitizeUrl(componentData.src), text: targetEntity });
 });
 
 AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");
