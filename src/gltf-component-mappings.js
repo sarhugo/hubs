@@ -662,7 +662,12 @@ function findVideoTarget(componentName, componentData, indexToEntityMap) {
   }
   return targetEntity;
 }
-AFRAME.GLTFModelPlus.registerComponent("video-chapters", "video-chapters");
+AFRAME.GLTFModelPlus.registerComponent("video-chapters", "video-chapters", (el, componentName, componentData) => {
+  el.setAttribute(componentName, {
+    ...componentData,
+    src: sanitizeUrl(componentData.src)
+  });
+});
 AFRAME.GLTFModelPlus.registerComponent(
   "video-screen",
   "video-screen",
@@ -691,6 +696,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     el.setAttribute(componentName, {
       ...componentData,
+      src: componentData.src ? sanitizeUrl(componentData.src) : undefined,
       target: targetEntity
     });
   });
