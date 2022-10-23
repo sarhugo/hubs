@@ -607,3 +607,14 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("quiz-answer", "quiz-answer", (el, componentName, componentData) => {
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("hoverable-visuals", "");
+  el.setAttribute("tags", {
+    singleActionButton: true
+  });
+
+  el.setAttribute(componentName, componentData);
+});
