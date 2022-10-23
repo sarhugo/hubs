@@ -24,7 +24,7 @@ if (hubs_HighlightInteractorOne || hubs_HighlightInteractorTwo || hubs_IsFrozen)
     ratio += -min(1.0, pow(dist2 * pulse, 3.0)) + 1.0;
   }
 
-  ratio = min(1.0, ratio);
+  ratio = min(.4, ratio);
 
   // Gamma corrected highlight color
   vec3 highlightColor = vec3(0.184, 0.499, 0.933);
