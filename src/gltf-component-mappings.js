@@ -810,7 +810,7 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
 AFRAME.GLTFModelPlus.registerComponent("quiz-answer", "quiz-answer", (el, componentName, componentData) => {
   el.setAttribute("class", "interactable");
   el.setAttribute("is-remote-hover-target", "");
-  el.setAttribute("hoverable-visuals", "");
+  el.setAttribute("hoverable-visuals", { force: true });
   el.setAttribute("tags", {
     singleActionButton: true
   });
