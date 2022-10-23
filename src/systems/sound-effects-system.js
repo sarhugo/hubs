@@ -18,7 +18,7 @@ import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import URL_SPIN from "../assets/sfx/spin.mp3";
 import URL_FAIL from "../assets/sfx/fail.mp3";
-import URL_SUCCESS from "../assets/success.mp3";
+import URL_SUCCESS from "../assets/sfx/success.mp3";
 import { setMatrixWorld } from "../utils/three-utils";
 import { SourceType } from "../components/audio-params";
 import { getOverriddenPanningModelType } from "../update-audio-settings";
