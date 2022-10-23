@@ -3,7 +3,7 @@ import LEVELS from "../assets/pipezania/levels.json";
 
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { spawnEmojiInFrontOfUser, emojis } from "./emoji";
-import { SOUND_MEDIA_LOADING, SOUND_PIPEZANIA_SPIN, SOUND_PIPEZANIA_FAIL, SOUND_PIPEZANIA_SUCCESS } from "../systems/sound-effects-system";
+import { SOUND_MEDIA_LOADING, SOUND_SPIN, SOUND_FAIL, SOUND_SUCCESS } from "../systems/sound-effects-system";
 
 const PIPE_TILES = {
   CORNER: 0,
@@ -396,13 +396,13 @@ AFRAME.registerComponent("pipezania", {
   },
   flood() {
     this.stopFlow();
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_FAIL);
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_FAIL);
     this.resetAtom();
     this.isFlowing = false;
   },
   success() {
     this.stopFlow();
-    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_SUCCESS);
+    this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SUCCESS);
     spawnEmojiInFrontOfUser(emojis.find(emoji => emoji.id === "clap"));
     this.finished = true;
   }
@@ -440,7 +440,7 @@ AFRAME.registerComponent("pipezania-tile", {
       }
       let angle;
       if ((angle = this.pipe.rotate())) {
-        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_PIPEZANIA_SPIN);
+        this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPIN);
         this.el.setAttribute("animation", {
           property: "rotation",
           dur: 500,
