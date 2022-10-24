@@ -46,13 +46,7 @@ export function PeopleMenuButton(props) {
   return (
     <ContentMenuButton {...props}>
       <PeopleIcon />
-      <span>
-        <FormattedMessage
-          id="content-menu.people-menu-button"
-          defaultMessage="People ({presenceCount})"
-          values={{ presenceCount: props.presencecount }}
-        />
-      </span>
+      { props.presencecount }
     </ContentMenuButton>
   );
 }

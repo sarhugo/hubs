@@ -732,19 +732,17 @@ AFRAME.registerComponent("media-video", {
       this.volumeDownButton.object3D.visible =
         this.hasAudioTracks && !this.data.hidePlaybackControls && !!this.video;
 
-    this.snapButton.object3D.visible =
-      !!this.video && !this.data.contentType.startsWith("audio/") && window.APP.hubChannel.can("spawn_and_move_media");
-    this.seekForwardButton.object3D.visible = !!this.video && !this.videoIsLive;
+    this.snapButton.object3D.visible = false;
+    this.seekForwardButton.object3D.visible = false;
 
     const mayModifyPlayHead =
       !!this.video && !this.videoIsLive && (!isPinned || window.APP.hubChannel.can("pin_objects"));
 
-    this.playPauseButton.object3D.visible =
-      this.seekForwardButton.object3D.visible =
-      this.seekBackButton.object3D.visible =
-        mayModifyPlayHead;
+    this.playPauseButton.object3D.visible = mayModifyPlayHead;
+    this.seekForwardButton.object3D.visible =
+    this.seekBackButton.object3D.visible = false;
 
-    this.linkButton.object3D.visible = !!mediaLoader.mediaOptions.href;
+    this.linkButton.object3D.visible = false;
 
     if (this.videoIsLive) {
       this.timeLabel.setAttribute("text", "value", "LIVE");

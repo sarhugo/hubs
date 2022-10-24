@@ -112,7 +112,7 @@
                     <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0" layers="mask: 256; recursive: true;" billboard="onlyY: true;">
                         <a-entity class="nametag-background" slice9="width: 1; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;">
                             <a-entity class="nametag-status-border" visible="false" slice9="width: 0.45; height: 0.2; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"></a-entity>
-                            <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0.025 0.001"></a-entity>
+                            <a-entity class="nametag-text" text="side: double; textAlign: center; color: #ddd; fontSize: 0.1;" text-raycast-hack position="0 0 0.001"></a-entity>
                         </a-entity>
                         <a-entity
                             is-not-remote-hover-target
@@ -233,40 +233,12 @@
                     listed-media
                 >
                     <a-entity class="freeze-menu" visibility-while-frozen="withinDistance: 100;" layers="mask: 256; recursive: true;">
-                        <a-entity mixin="rounded-text-button ui"
-                            is-remote-hover-target
-                            tags="singleActionButton: true; isHoverMenuChild: true;"
-                            local-refresh-media-button
-                            position="0 -0.6 0.001"
-                        >
-                            <a-entity text="value:refresh; textAlign:center;"
-                                text-raycast-hack
-                                position="0 0 0.02">
-                            </a-entity>
-                        </a-entity>
-                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button" open-media-button="onlyOpenLink: true" position="0 -0.25 0.001">
-                            <a-entity text="value:open link; textAlign:center;" text-raycast-hack position="0 0 0.02"></a-entity>
-                        </a-entity>
-                        <a-entity
-                            mixin="rounded-action-button"
-                            is-remote-hover-target
-                            tags="singleActionButton:true;"
-                            mirror-media-button
-                            visibility-on-content-types="contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf;"
-                            position="0 0 0.001">
-                            <a-entity
-                                sprite
-                                icon-button="image: inspect-action.png; hoverImage: inspect-action.png"
-                                scale="0.165 0.165 0.165"
-                                position="0 0 0.001"
-                            ></a-entity>
-                        </a-entity>
                         <a-entity
                             mixin="rounded-button"
                             tags="isHoldable: true; holdableButton: true;"
                             is-remote-hover-target
                             inspect-button
-                            position="0 0.25 0.001">
+                            position="0 0 0.001">
                             <a-entity
                                 sprite
                                 icon-button="image: focus-action.png; hoverImage: focus-action.png"
@@ -693,15 +665,15 @@
                     <a-entity mixin="rounded-twitter-text-action-button ui" is-remote-hover-target tags="singleActionButton: true; isHoverMenuChild: true;" tweet-media-button visibility-on-content-types="contentTypes: video/mp4; contentSubtype: video-camera; visible: true;" position="0 0.285 0.001">
                         <a-entity text="value:tweet; textAlign:center;" text-raycast-hack position="0 0 0.02"></a-entity>
                     </a-entity>
-                    <a-entity class="video-time-label" text="value: 0; anchorX: center; textAlign: center; color: #aaa; fontSize: 0.04;" text-raycast-hack position="0 -0.24 0"></a-entity>
-                    <a-entity class="video-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ccc; letterSpacing: 0.1; fontSize: 0.06;" text-raycast-hack position="0.0 0.14 0"></a-entity>
+                    <a-entity class="video-time-label" text="value: 0; anchorX: center; textAlign: center; color: #aaa; fontSize: 0.02;" text-raycast-hack position="0 -0.24 0"></a-entity>
+                    <a-entity class="video-volume-label" text="value: 0%; anchorX: center; textAlign: center; color: #ccc; letterSpacing: 0.1; fontSize: 0.03;" text-raycast-hack position="-0.45 0 0" rotation="0 0 90"></a-entity>
                     <a-entity
                         is-remote-hover-target
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: volume_down.png; hoverImage: volume_down-hover.png;"
-                        scale="0.075 0.075 0.075"
-                        position="-0.275 0.14 0"
+                        scale="0.05 0.05 0.05"
+                        position="-0.45 0.15 0"
                         class="ui video-volume-down-button"
                     ></a-entity>
                     <a-entity
@@ -709,8 +681,8 @@
                         tags="singleActionButton: true; isHoverMenuChild: true;"
                         sprite
                         icon-button="image: volume_up.png; hoverImage: volume_up-hover.png;"
-                        scale="0.075 0.075 0.075"
-                        position="0.275 0.14 0"
+                        scale="0.05 0.05 0.05"
+                        position="-0.45 -0.15 0"
                         class="ui video-volume-up-button"
                     ></a-entity>
                     <a-entity class="video-playback">
@@ -729,8 +701,8 @@
                             tags="singleActionButton: true; isHoverMenuChild: true;"
                             sprite
                             icon-button="image: pause.png; hoverImage: pause-hover.png; activeImage: play.png; activeHoverImage: play-hover.png"
-                            scale="0.15 0.15 0.15"
-                            position="0 -0.125 0"
+                            scale="0.2 0.2 0.2"
+                            position="0 0 0"
                             class="ui video-playpause-button"
                             visible="false"
                         ></a-entity>
