@@ -19,20 +19,25 @@ class Quiz {
   setCorrect(element) {
     this.correct = element
   }
+  reset() {
+    this.solved = false;
+    this.answers.forEach((el) => {
+      el.object3DMap.mesh.children[0].visible = false;
+    });
+  }
   solve(element) {
     if (this.solved) {
       return;
     }
     this.solved = true;
+    element.object3DMap.mesh.children[0].visible = true;
     if (this.correct === element) {
       spawnEmojiInFrontOfUser(emojis.find(emoji => emoji.id === "clap"));
       element.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SUCCESS);
     } else {
+      this.correct.object3DMap.mesh.children[0].visible = true;
       element.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_FAIL);
     }
-    this.answers.forEach((el) => {
-      el.object3DMap.mesh.children[0].visible = true;
-    });
   }
 }
 
@@ -50,6 +55,7 @@ AFRAME.registerComponent("quiz-answer", {
     }
   },
   play() {
+    this.mngr.reset();
     this.el.object3D.addEventListener("interact", this.onClick);
   },
 
