@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { injectIntl, FormattedMessage, defineMessages } from "react-intl";
 import configs from "../utils/configs";
-import { pushHistoryPath, pushHistoryState, sluglessPath } from "../utils/history";
+import { pushHistoryPath, sluglessPath } from "../utils/history";
 import { SOURCES } from "../storage/media-search-store";
 import { showFullScreenIfWasFullScreen } from "../utils/fullscreen";
 import { AvatarUrlModalContainer } from "./room/AvatarUrlModalContainer";
@@ -13,9 +13,9 @@ import { IconButton } from "./input/IconButton";
 import { ReactComponent as UploadIcon } from "./icons/Upload.svg";
 import { ReactComponent as LinkIcon } from "./icons/Link.svg";
 import { remixAvatar } from "../utils/avatar-utils";
-import { fetchReticulumAuthenticated, getReticulumFetchUrl } from "../utils/phoenix-utils";
+import { fetchReticulumAuthenticated } from "../utils/phoenix-utils";
 import { proxiedUrlFor, scaledThumbnailUrlFor } from "../utils/media-url-utils";
-import { CreateTile, MediaTile } from "./room/MediaTiles";
+import { MediaTile } from "./room/MediaTiles";
 import { SignInMessages } from "./auth/SignInModal";
 const isMobile = AFRAME.utils.device.isMobile();
 const isMobileVR = AFRAME.utils.device.isMobileVR();
@@ -51,11 +51,7 @@ const DEFAULT_FACETS = {
     { text: "Sports", params: { filter: "sports-fitness" } },
     { text: "Weapons", params: { filter: "weapons-military" } }
   ],
-  avatars: [
-    { text: "Featured", params: { filter: "featured" } },
-    { text: "My Avatars", params: { filter: "my-avatars" } },
-    { text: "Newest", params: { filter: "" } }
-  ],
+  avatars: [],
   favorites: [],
   scenes: [{ text: "Featured", params: { filter: "featured" } }, { text: "My Scenes", params: { filter: "my-scenes" } }]
 };
@@ -485,73 +481,13 @@ class MediaBrowserContainer extends Component {
         entries.length > 0 ||
         !showEmptyStringOnNoResult ? (
           <>
-            {urlSource === "avatars" && (
-              <CreateTile
-                type="avatar"
-                onClick={this.onCreateAvatar}
-                label={<FormattedMessage id="media-browser.create-avatar" defaultMessage="Create Avatar" />}
-              />
-            )}
-            {urlSource === "scenes" &&
-              configs.feature("enable_spoke") && (
-                <CreateTile
-                  as="a"
-                  href="/spoke/new"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  type="scene"
-                  label={
-                    <FormattedMessage
-                      id="media-browser.create-scene"
-                      defaultMessage="Create Scene with {editorName}"
-                      values={{ editorName: configs.translation("editor-name") }}
-                    />
-                  }
-                />
-              )}
             {entries.map((entry, idx) => {
-              const isAvatar = entry.type === "avatar" || entry.type === "avatar_listing";
-              const isScene = entry.type === "scene" || entry.type === "scene_listing";
-              const onShowSimilar =
-                entry.type === "avatar_listing"
-                  ? e => {
-                      e.preventDefault();
-                      this.onShowSimilar(entry.id, entry.name);
-                    }
-                  : undefined;
-
-              let onEdit;
-
-              if (entry.type === "avatar") {
-                onEdit = e => {
-                  e.preventDefault();
-                  pushHistoryState(this.props.history, "overlay", "avatar-editor", { avatarId: entry.id });
-                };
-              } else if (entry.type === "scene") {
-                onEdit = e => {
-                  e.preventDefault();
-                  const spokeProjectUrl = getReticulumFetchUrl(`/spoke/projects/${entry.project_id}`);
-                  window.open(spokeProjectUrl);
-                };
-              }
-
-              let onCopy;
-
-              if (isAvatar) {
-                onCopy = e => this.handleCopyAvatar(e, entry);
-              } else if (isScene) {
-                onCopy = e => this.handleCopyScene(e, entry);
-              }
-
               return (
                 <MediaTile
                   key={`${entry.id}_${idx}`}
                   entry={entry}
                   processThumbnailUrl={this.processThumbnailUrl}
                   onClick={e => this.handleEntryClicked(e, entry)}
-                  onEdit={onEdit}
-                  onShowSimilar={onShowSimilar}
-                  onCopy={onCopy}
                 />
               );
             })}

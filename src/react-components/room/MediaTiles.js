@@ -6,9 +6,6 @@ import styles from "./MediaTiles.scss";
 import { ReactComponent as PeopleIcon } from "../icons/People.svg";
 import { ReactComponent as StarIcon } from "../icons/Star.svg";
 import { ReactComponent as AddIcon } from "../icons/Add.svg";
-import { ReactComponent as PenIcon } from "../icons/Pen.svg";
-import { ReactComponent as DuplicateIcon } from "../icons/Duplicate.svg";
-import { ReactComponent as SearchIcon } from "../icons/Search.svg";
 import { ReactComponent as HelpIcon } from "../icons/Help.svg";
 import { ReactComponent as ExternalLinkIcon } from "../icons/ExternalLink.svg";
 
@@ -128,7 +125,7 @@ CreateTile.propTypes = {
   type: PropTypes.string
 };
 
-export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowSimilar, onCopy, onInfo, ...rest }) {
+export function MediaTile({ entry, processThumbnailUrl, onClick, onInfo, ...rest }) {
   const intl = useIntl();
   const creator = entry.attributions && entry.attributions.creator;
   const publisherName =
@@ -203,58 +200,6 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onEdit, onShowS
         </div>
       )}
       <div className={styles.tileActions}>
-        {entry.type === "avatar" && (
-          <TileAction
-            title={intl.formatMessage({ id: "media-tile.action.edit-avatar", defaultMessage: "Edit avatar" })}
-            onClick={onEdit}
-          >
-            <PenIcon />
-          </TileAction>
-        )}
-        {entry.type === "scene" &&
-          entry.project_id && (
-            <TileAction
-              onClick={onEdit}
-              title={intl.formatMessage({ id: "media-tile.action.edit-scene", defaultMessage: "Edit scene" })}
-            >
-              <PenIcon />
-            </TileAction>
-          )}
-        {entry.type === "avatar_listing" && (
-          <TileAction
-            title={intl.formatMessage({
-              id: "media-tile.action.show-similar-avatars",
-              defaultMessage: "Show similar avatars"
-            })}
-            onClick={onShowSimilar}
-          >
-            <SearchIcon />
-          </TileAction>
-        )}
-        {entry.type === "avatar_listing" &&
-          entry.allow_remixing && (
-            <TileAction
-              title={intl.formatMessage({
-                id: "media-tile.action.copy-avatar",
-                defaultMessage: "Copy to my avatars"
-              })}
-              onClick={onCopy}
-            >
-              <DuplicateIcon />
-            </TileAction>
-          )}
-        {entry.type === "scene_listing" &&
-          entry.allow_remixing && (
-            <TileAction
-              title={intl.formatMessage({
-                id: "media-tile.action.copy-scene",
-                defaultMessage: "Copy to my scenes"
-              })}
-              onClick={onCopy}
-            >
-              <DuplicateIcon />
-            </TileAction>
-          )}
         {entry.type === "room" &&
           onInfo &&
           entry.description && (
