@@ -10,13 +10,13 @@ class InformationPanelsGroup {
   addElement(element) {
     if (!this.elements.includes(element)) {
       this.elements.push(element);
-      element.setAttribute("visible", false);
+      element.setAttribute("scale", "0 0 0");
     }
   }
   setDefault(element) {
     this.default = element
     if (!this.active) {
-      element.setAttribute("visible", true)
+      element.setAttribute("scale", "1 1 1");
     }
   }
   toggle(element) {
@@ -26,7 +26,11 @@ class InformationPanelsGroup {
       this.active = element;
     }
     this.elements.forEach((el) => {
-      el.setAttribute("visible", el === (this.active || this.default));
+      if (el === (this.active || this.default)) {
+        el.setAttribute("scale", "1 1 1");
+      } else {
+        el.setAttribute("scale", "0 0 0");
+      }
     })
   }
 }
