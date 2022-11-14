@@ -122,8 +122,7 @@ function findPairCollision(world, physicsSystem, entities) {
     }
   }
 }
-export function connectPairsSystem(world) {
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+export function connectPairsSystem(world, physicsSystem) {
   initialize(world, queryEnterContentPairs(world));
   add(world, physicsSystem, anyEntityWith(world, RemoteRight), ConstraintRemoteRight, queryEnterRemoteRight(world));
   add(world, physicsSystem, anyEntityWith(world, RemoteLeft), ConstraintRemoteLeft, queryEnterRemoteLeft(world));
