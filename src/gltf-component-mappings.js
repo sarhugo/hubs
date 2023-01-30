@@ -607,3 +607,22 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
 
   el.setAttribute(componentName, componentData);
 });
+
+AFRAME.GLTFModelPlus.registerComponent("simple-link", "simple-link", (el, componentName, componentData) => {
+  el.setAttribute("class", "interactable");
+  el.setAttribute("is-remote-hover-target", "");
+  el.setAttribute("hoverable-visuals", { force: true });
+  el.setAttribute("tags", {
+    singleActionButton: true
+  });
+  el.setAttribute(componentName, {
+    href: sanitizeUrl(componentData.href)
+  });
+  el.setAttribute("animation", {
+    property: "position",
+    from: "0 0 -.01",
+    to: "0 0 .01",
+    loop: true,
+    dir: "alternate"
+  });
+});
