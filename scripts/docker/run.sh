@@ -9,13 +9,14 @@ if [ -z ${turkeyCfg_cors_proxy_server+x} ]; then export turkeyCfg_cors_proxy_ser
 if [ -z ${turkeyCfg_shortlink_domain+x} ]; then export turkeyCfg_shortlink_domain="$SUB_DOMAIN.$DOMAIN"; fi
 if [ -z ${turkeyCfg_sentry_dsn+x} ]; then export turkeyCfg_sentry_dsn=""; fi
 if [ -z ${turkeyCfg_postgrest_server+x} ]; then export turkeyCfg_postgrest_server=""; fi
-if [ -z ${turkeyCfg_ita_server+x} ]; then export turkeyCfg_ita_server=""; fi
+# if [ -z ${turkeyCfg_ita_server+x} ]; then export turkeyCfg_ita_server=""; fi
 if [ -z ${turkeyCfg_ga_tracking_id+x} ]; then export turkeyCfg_ga_tracking_id=""; fi
+export turkeyCfg_ita_server="turkey"
 
-find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \;           
-find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \; 
-find /www/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}\//https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \; 
-find /www/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}/https:\/\/${SUB_DOMAIN}-assets.${DOMAIN}\/hubs\//g" {} \;             
+find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}\//${turkeyCfg_base_assets_path//\//\\\/}/g" {} \;           
+find /www/hubs/ -type f -name *.html -exec sed -i "s/{{rawhubs-base-assets-path}}/${turkeyCfg_base_assets_path//\//\\\/}/g" {} \; 
+find /www/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}\//${turkeyCfg_base_assets_path//\//\\\/}/g" {} \; 
+find /www/hubs/ -type f -name *.css -exec sed -i "s/{{rawhubs-base-assets-path}}/${turkeyCfg_base_assets_path//\//\\\/}/g" {} \;             
 anchor="<!-- DO NOT REMOVE\/EDIT THIS COMMENT - META_TAGS -->" 
 for f in /www/hubs/pages/*.html; do 
     for var in $(printenv); do 
@@ -23,4 +24,7 @@ for f in /www/hubs/pages/*.html; do
     [[ $var == $prefix* ]] && sed -i "s/$anchor/ <meta name=\"env:${var#$prefix}\" content=\"${!var//\//\\\/}\"\/> $anchor/" $f; 
     done 
 done 
+
+if [ "${access_log}" = "enabled" ]; then sed -i "s/access_log off;//g" /etc/nginx/conf.d/default.conf; fi
+
 nginx -g "daemon off;"

@@ -86,6 +86,7 @@ module.exports = (env, argv) => {
   const defaultHostName = "hubs.local";
   const host = process.env.HOST_IP || defaultHostName;
 
+  const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
       type: "filesystem"
@@ -112,7 +113,8 @@ module.exports = (env, argv) => {
         buffer: require.resolve("buffer/"),
         stream: require.resolve("stream-browserify"),
         path: require.resolve("path-browserify")
-      }
+      },
+      extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
       admin: path.join(__dirname, "src", "admin.js")
@@ -135,7 +137,7 @@ module.exports = (env, argv) => {
       },
       host: process.env.HOST_IP || "0.0.0.0",
       port: process.env.PORT || "8989",
-      allowedHosts: [host],
+      allowedHosts: [host, internalHostname],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
@@ -183,7 +185,6 @@ module.exports = (env, argv) => {
           test: /\.tsx?$/,
           loader: "babel-loader",
           options: require("../babel.config"),
-          include: [path.resolve(__dirname, "src")],
           exclude: function (modulePath) {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }

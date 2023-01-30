@@ -168,6 +168,7 @@ function updateRenderTarget(world, camera) {
 
   const tmpRenderTarget = renderer.getRenderTarget();
   renderer.setRenderTarget(renderTarget);
+  renderer.clearDepth();
   renderer.render(sceneEl.object3D, world.eid2obj.get(CameraTool.cameraRef[camera]));
   renderer.setRenderTarget(tmpRenderTarget);
 
@@ -246,11 +247,6 @@ function updateUI(world, camera) {
     sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
     sndToggleLblObj.sync();
   }
-
-  // TODO HACK hidden objects are still not having their matricies updated correctly
-  // Seems like a regression of #5421
-  // updateMatrices should be checking forceWorldUpdate instead of parent.childrenNeedMatrixWorldUpdate
-  snapMenuObj.childrenNeedMatrixWorldUpdate = true;
 }
 
 let snapPixels;
@@ -295,9 +291,7 @@ export function cameraToolSystem(world) {
       format: THREE.RGBAFormat,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.NearestFilter,
-      encoding: THREE.sRGBEncoding,
-      depth: false,
-      stencil: false
+      encoding: THREE.sRGBEncoding
     });
     renderTarget.lastUpdated = 0;
     renderTarget.needsUpdate = true;

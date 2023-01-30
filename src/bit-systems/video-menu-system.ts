@@ -14,7 +14,7 @@ import {
   VideoMenuItem
 } from "../bit-components";
 import { timeFmt } from "../components/media-video";
-import { takeOwnership } from "../systems/netcode";
+import { takeOwnership } from "../utils/take-ownership";
 import { paths } from "../systems/userinput/paths";
 import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";
@@ -73,10 +73,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const menuObj = world.eid2obj.get(menu)!;
     const videoObj = world.eid2obj.get(eid)!;
     videoObj.add(menuObj);
-    // TODO: Fix add in threejs
-    // TODO remove should also reset matrixWorld to cachedMatrixWorld
-    menuObj.matrixWorldNeedsUpdate = true;
-    menuObj.childrenNeedMatrixWorldUpdate = true;
     setCursorRaycastable(world, menu, true);
   });
 
