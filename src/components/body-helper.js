@@ -35,7 +35,7 @@ AFRAME.registerComponent("body-helper", {
     scaleAutoUpdate: { default: true }
   },
 
-  init: function() {
+  init: function () {
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.alive = true;
     this.el.object3D.updateMatrices();
@@ -45,13 +45,13 @@ AFRAME.registerComponent("body-helper", {
     Rigidbody.bodyId[eid] = this.uuid; //uuid is a lie, it's actually an int
   },
 
-  update: function(prevData) {
+  update: function (prevData) {
     if (prevData) {
       this.system.updateBody(this.uuid, this.data);
     }
   },
 
-  remove: function() {
+  remove: function () {
     this.system.removeBody(this.uuid);
     const eid = this.el.object3D.eid;
     removeComponent(APP.world, Rigidbody, eid);

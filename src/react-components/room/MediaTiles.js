@@ -15,25 +15,22 @@ const PUBLISHER_FOR_ENTRY_TYPE = {
 };
 
 function useThumbnailSize(isImage, isAvatar, imageAspect) {
-  return useMemo(
-    () => {
-      let imageHeight = 220;
-      if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
+  return useMemo(() => {
+    let imageHeight = 220;
+    if (isAvatar) imageHeight = Math.floor(imageHeight * 1.5);
 
-      // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
-      let imageWidth;
-      if (isImage) {
-        imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
-      } else if (isAvatar) {
-        imageWidth = Math.floor((9 / 16) * imageHeight);
-      } else {
-        imageWidth = Math.floor(Math.max((16 / 9) * imageHeight, imageHeight * 0.85));
-      }
+    // Aspect ratio can vary per image if its an image result. Avatars are a taller portrait aspect, o/w assume 720p
+    let imageWidth;
+    if (isImage) {
+      imageWidth = Math.floor(Math.max(imageAspect * imageHeight, imageHeight * 0.85));
+    } else if (isAvatar) {
+      imageWidth = Math.floor((9 / 16) * imageHeight);
+    } else {
+      imageWidth = Math.floor(Math.max((16 / 9) * imageHeight, imageHeight * 0.85));
+    }
 
-      return [imageWidth, imageHeight];
-    },
-    [isImage, isAvatar, imageAspect]
-  );
+    return [imageWidth, imageHeight];
+  }, [isImage, isAvatar, imageAspect]);
 }
 
 function useThumbnail(entry, processThumbnailUrl) {
@@ -43,14 +40,9 @@ function useThumbnail(entry, processThumbnailUrl) {
 
   const [thumbnailWidth, thumbnailHeight] = useThumbnailSize(isImage, isAvatar, imageAspect);
 
-  const thumbnailUrl = useMemo(
-    () => {
-      return processThumbnailUrl
-        ? processThumbnailUrl(entry, thumbnailWidth, thumbnailHeight)
-        : entry.images.preview.url;
-    },
-    [entry, thumbnailWidth, thumbnailHeight, processThumbnailUrl]
-  );
+  const thumbnailUrl = useMemo(() => {
+    return processThumbnailUrl ? processThumbnailUrl(entry, thumbnailWidth, thumbnailHeight) : entry.images.preview.url;
+  }, [entry, thumbnailWidth, thumbnailHeight, processThumbnailUrl]);
 
   return [thumbnailUrl, thumbnailWidth, thumbnailHeight];
 }
@@ -143,13 +135,11 @@ export function MediaTile({ entry, processThumbnailUrl, onClick, onInfo, ...rest
         <>
           {creator && creator.name === undefined && <span>{creator}</span>}
           {creator && creator.name && !creator.url && <span>{creator.name}</span>}
-          {creator &&
-            creator.name &&
-            creator.url && (
-              <a href={creator.url} target="_blank" rel="noopener noreferrer">
-                {creator.name}
-              </a>
-            )}
+          {creator && creator.name && creator.url && (
+            <a href={creator.url} target="_blank" rel="noopener noreferrer">
+              {creator.name}
+            </a>
+          )}
           {publisherName && (
             <>
               <a href={entry.url} target="_blank" rel="noopener noreferrer">
