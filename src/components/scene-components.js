@@ -42,3 +42,4 @@ import "./connect-pairs";
 import "./room-link";
 import "./portal";
 import "./quiz";
+import "./simple-link";
