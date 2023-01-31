@@ -615,7 +615,7 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
 
   try {
     // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-    if (typeof target === "number") {
+    if (typeof text === "number") {
       targetEntity = indexToEntityMap[text];
     } else {
       targetEntity = text?.el;
@@ -640,7 +640,7 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
 
 AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");
 
-function findVideoTarget(componentName, componentData, indexToEntityMap) {
+function findReferenceTarget(componentName, componentData, indexToEntityMap) {
   const { target } = componentData;
 
   let targetEntity;
@@ -673,7 +673,7 @@ AFRAME.GLTFModelPlus.registerComponent(
   "video-screen",
   (el, componentName, componentData, components, indexToEntityMap) => {
 
-    const targetEntity = findVideoTarget(componentName, componentData, indexToEntityMap);
+    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
 
     el.setAttribute(componentName, {
       ...componentData,
@@ -685,7 +685,7 @@ AFRAME.GLTFModelPlus.registerComponent(
   "video-control",
   (el, componentName, componentData, components, indexToEntityMap) => {
 
-    const targetEntity = findVideoTarget(componentName, componentData, indexToEntityMap);
+    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
 
     el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
@@ -722,25 +722,7 @@ AFRAME.GLTFModelPlus.registerComponent(
   "info-panel-control",
   (el, componentName, componentData, components, indexToEntityMap) => {
 
-    const { target } = componentData;
-
-    let targetEntity;
-
-    try {
-      // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-      if (typeof target === "number") {
-        targetEntity = indexToEntityMap[target];
-      } else {
-        targetEntity = target?.el;
-      }
-
-      if (!targetEntity) {
-        throw new Error(`Couldn't find target entity with index: ${target}.`);
-      }
-    } catch (e) {
-      console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
-      return;
-    }
+    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
 
     el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
@@ -751,7 +733,7 @@ AFRAME.GLTFModelPlus.registerComponent(
 
     el.setAttribute(componentName, {
       ...componentData,
-      target: targetEntity,
+      target: targetEntity
     });
   }
 );
