@@ -3,7 +3,16 @@ import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
 import { CONSTANTS } from "three-ammo";
 const { DISABLE_DEACTIVATION, ACTIVE_TAG } = CONSTANTS.ACTIVATION_STATE;
 
-import { addComponent, defineQuery, enterQuery, entityExists, Not, removeComponent, exitQuery, hasComponent } from "bitecs";
+import {
+  addComponent,
+  defineQuery,
+  enterQuery,
+  entityExists,
+  Not,
+  removeComponent,
+  exitQuery,
+  hasComponent
+} from "bitecs";
 import {
   RemoteRight,
   RemoteLeft,
@@ -43,8 +52,8 @@ const grabBodyOptions = { type: "dynamic", activationState: DISABLE_DEACTIVATION
 const releaseBodyOptions = { activationState: ACTIVE_TAG };
 const connectedBodyOptions = { type: "static" };
 
-const PIECE_EDGE = new THREE.Vector3(0, .25, 0);
-const PIECE_SNAP = .25;
+const PIECE_EDGE = new THREE.Vector3(0, 0.25, 0);
+const PIECE_SNAP = 0.25;
 
 function add(world, physicsSystem, interactor, constraintComponent, entities) {
   if (entities.length) {
@@ -60,8 +69,8 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
     physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {
       type: "pointToPoint",
-      pivot: new THREE.Vector3(0,0,0),
-      targetPivot: new THREE.Vector3(0,0,0)
+      pivot: new THREE.Vector3(0, 0, 0),
+      targetPivot: new THREE.Vector3(0, 0, 0)
     });
     addComponent(world, Constraint, eid);
     addComponent(world, constraintComponent, eid);
@@ -70,8 +79,8 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
 
 function initializePuzzle(world, entities) {
   for (let i = 0; i < entities.length; i++) {
-    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[entities[i]])
-    unlock.el.setAttribute("visible", false)
+    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[entities[i]]);
+    unlock.el.setAttribute("visible", false);
   }
 }
 
@@ -94,10 +103,7 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
       physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
       physicsSystem.removeConstraint(interactor);
       removeComponent(world, constraintComponent, eid);
-      if (
-        !hasComponent(world, ConstraintRemoteLeft, eid) &&
-        !hasComponent(world, ConstraintRemoteRight, eid)
-      ) {
+      if (!hasComponent(world, ConstraintRemoteLeft, eid) && !hasComponent(world, ConstraintRemoteRight, eid)) {
         removeComponent(world, Constraint, eid);
       }
     }
@@ -108,21 +114,29 @@ function findPairCollision(world, physicsSystem, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
-    const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[eid])
-      .map((uuid) => {
+    const collisions = physicsSystem
+      .getCollisions(Rigidbody.bodyId[eid])
+      .map(uuid => {
         const bodyData = physicsSystem.bodyUuidToData.get(uuid);
         const object3D = bodyData && bodyData.object3D;
         if (object3D && hasComponent(world, ConnectPairs, object3D.eid)) {
           return object3D.eid;
         }
-      }).filter(Boolean);
+      })
+      .filter(Boolean);
     for (let j = 0; j < collisions.length; j++) {
-      if (ConnectPairs.pair[eid] === ConnectPairs.pair[collisions[j]] &&
-        ConnectPairs.side[eid] != ConnectPairs.side[collisions[j]]) {
+      if (
+        ConnectPairs.pair[eid] === ConnectPairs.pair[collisions[j]] &&
+        ConnectPairs.side[eid] != ConnectPairs.side[collisions[j]]
+      ) {
         const obj = world.eid2obj.get(eid);
         const target = world.eid2obj.get(collisions[j]);
-        const objEdge = ConnectPairs.side[eid] ? obj.position.clone().add(PIECE_EDGE) : obj.position.clone().sub(PIECE_EDGE);
-        const targetEdge = ConnectPairs.side[eid] ? target.position.clone().sub(PIECE_EDGE) : target.position.clone().add(PIECE_EDGE);        
+        const objEdge = ConnectPairs.side[eid]
+          ? obj.position.clone().add(PIECE_EDGE)
+          : obj.position.clone().sub(PIECE_EDGE);
+        const targetEdge = ConnectPairs.side[eid]
+          ? target.position.clone().sub(PIECE_EDGE)
+          : target.position.clone().add(PIECE_EDGE);
         if (objEdge.distanceTo(targetEdge) < PIECE_SNAP) {
           target.position.copy(objEdge);
           target.matrixNeedsUpdate = true;
@@ -140,8 +154,8 @@ function findPairCollision(world, physicsSystem, entities) {
 function isItFinished(world, puzzles, pairs, connections, justConnected) {
   if (justConnected.length) return;
   for (let i = 0; i < puzzles.length; i++) {
-    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[puzzles[i]])
-    unlock.el.setAttribute("visible", pairs.length == connections.length)
+    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[puzzles[i]]);
+    unlock.el.setAttribute("visible", pairs.length == connections.length);
   }
 }
 
@@ -169,5 +183,11 @@ export function connectPairsSystem(world, physicsSystem) {
     queryExitRemoteLeft(world)
   );
 
-  isItFinished(world, queryContentPairsPuzzle(world), queryContentPairs(world), queryConnected(world), queryEnterConnected(world));
+  isItFinished(
+    world,
+    queryContentPairsPuzzle(world),
+    queryContentPairs(world),
+    queryConnected(world),
+    queryEnterConnected(world)
+  );
 }

@@ -608,65 +608,8 @@ AFRAME.GLTFModelPlus.registerComponent("reflection-probe", "reflection-probe", (
   el.setAttribute(componentName, componentData);
 });
 
-AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, componentName, componentData, components, indexToEntityMap) => {
-  const { text } = componentData;
-
-  let targetEntity;
-
-  try {
-    // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-    if (typeof text === "number") {
-      targetEntity = indexToEntityMap[text];
-    } else {
-      targetEntity = text?.el;
-    }
-
-    if (!targetEntity) {
-      throw new Error(`Couldn't find target entity with index: ${text}.`);
-    }
-  } catch (e) {
-    console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
-    return;
-  }
-
-  el.setAttribute("class", "interactable");
-  el.setAttribute("is-remote-hover-target", "");
-  el.setAttribute("tags", {
-    isHoldable: true,
-    holdableButton: true
-  });
-  el.setAttribute(componentName, { ...componentData, src: sanitizeUrl(componentData.src), text: targetEntity });
-});
-
-AFRAME.GLTFModelPlus.registerComponent(
-  "pipezania",
-  "pipezania",
-  (el, componentName, componentData, components, indexToEntityMap) => {
-    const { unlock } = componentData;
-
-    let targetEntity;
-
-    try {
-      // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-      if (typeof unlock === "number") {
-        targetEntity = indexToEntityMap[unlock];
-      } else {
-        targetEntity = unlock?.el;
-      }
-    } catch (e) {
-      console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
-      return;
-    }
-
-    el.setAttribute(componentName, {
-      ...componentData,
-      unlock: targetEntity
-    });
-  }
-);
-
-function findReferenceTarget(componentName, componentData, indexToEntityMap) {
-  const { target } = componentData;
+function findReferenceEntity(propertyName, componentName, componentData, indexToEntityMap) {
+  const target = componentData[propertyName];
 
   let targetEntity;
 
@@ -687,6 +630,36 @@ function findReferenceTarget(componentName, componentData, indexToEntityMap) {
   }
   return targetEntity;
 }
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "earth-globe",
+  "earth-globe",
+  (el, componentName, componentData, components, indexToEntityMap) => {
+    const targetEntity = findReferenceEntity("text", componentName, componentData, indexToEntityMap);
+
+    el.setAttribute("class", "interactable");
+    el.setAttribute("is-remote-hover-target", "");
+    el.setAttribute("tags", {
+      isHoldable: true,
+      holdableButton: true
+    });
+    el.setAttribute(componentName, { ...componentData, src: sanitizeUrl(componentData.src), text: targetEntity });
+  }
+);
+
+AFRAME.GLTFModelPlus.registerComponent(
+  "pipezania",
+  "pipezania",
+  (el, componentName, componentData, components, indexToEntityMap) => {
+    const targetEntity = findReferenceEntity("unlock", componentName, componentData, indexToEntityMap);
+
+    el.setAttribute(componentName, {
+      ...componentData,
+      unlock: targetEntity
+    });
+  }
+);
+
 AFRAME.GLTFModelPlus.registerComponent("video-chapters", "video-chapters", (el, componentName, componentData) => {
   el.setAttribute(componentName, {
     ...componentData,
@@ -697,20 +670,19 @@ AFRAME.GLTFModelPlus.registerComponent(
   "video-screen",
   "video-screen",
   (el, componentName, componentData, components, indexToEntityMap) => {
-
-    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
+    const targetEntity = findReferenceEntity("target", componentName, componentData, indexToEntityMap);
 
     el.setAttribute(componentName, {
       ...componentData,
       target: targetEntity
     });
-  });
+  }
+);
 AFRAME.GLTFModelPlus.registerComponent(
   "video-control",
   "video-control",
   (el, componentName, componentData, components, indexToEntityMap) => {
-
-    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
+    const targetEntity = findReferenceEntity("target", componentName, componentData, indexToEntityMap);
 
     el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
@@ -724,30 +696,27 @@ AFRAME.GLTFModelPlus.registerComponent(
       src: componentData.src ? sanitizeUrl(componentData.src) : undefined,
       target: targetEntity
     });
-  });
+  }
+);
 
-AFRAME.GLTFModelPlus.registerComponent(
-  "rotation-loop",
-  "rotation-loop",
-  (el, componentName, componentData) => {
-    const to = { x: 0, y: 0, z: 0 }
-    to[componentData.axis] = 360
-    el.setAttribute("animation", {
-      property: "rotation",
-      to,
-      loop: true,
-      easing: "linear",
-      dur: componentData.speed * 1000
-    })
+AFRAME.GLTFModelPlus.registerComponent("rotation-loop", "rotation-loop", (el, componentName, componentData) => {
+  const to = { x: 0, y: 0, z: 0 };
+  to[componentData.axis] = 360;
+  el.setAttribute("animation", {
+    property: "rotation",
+    to,
+    loop: true,
+    easing: "linear",
+    dur: componentData.speed * 1000
   });
+});
 
 AFRAME.GLTFModelPlus.registerComponent("info-panel", "info-panel");
 AFRAME.GLTFModelPlus.registerComponent(
   "info-panel-control",
   "info-panel-control",
   (el, componentName, componentData, components, indexToEntityMap) => {
-
-    const targetEntity = findReferenceTarget(componentName, componentData, indexToEntityMap);
+    const targetEntity = findReferenceEntity("target", componentName, componentData, indexToEntityMap);
 
     el.setAttribute("class", "interactable"); // This makes the object targetable by the cursor-targetting-system
     el.setAttribute("is-remote-hover-target", ""); // This makes the object hoverable in the interaction system
@@ -763,28 +732,18 @@ AFRAME.GLTFModelPlus.registerComponent(
   }
 );
 
-AFRAME.GLTFModelPlus.registerComponent("connect-pairs-puzzle", "connect-pairs-puzzle", (el, componentName, componentData, components, indexToEntityMap) => {
-  const { unlock } = componentData;
+AFRAME.GLTFModelPlus.registerComponent(
+  "connect-pairs-puzzle",
+  "connect-pairs-puzzle",
+  (el, componentName, componentData, components, indexToEntityMap) => {
+    const targetEntity = findReferenceEntity("unlock", componentName, componentData, indexToEntityMap);
 
-  let targetEntity;
-
-  try {
-    // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
-    if (typeof unlock === "number") {
-      targetEntity = indexToEntityMap[unlock];
-    } else {
-      targetEntity = unlock?.el;
-    }
-  } catch (e) {
-    console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
-    return;
+    el.setAttribute(componentName, {
+      ...componentData,
+      unlock: targetEntity
+    });
   }
-  
-  el.setAttribute(componentName, {
-    ...componentData,
-    unlock: targetEntity
-  });
-});
+);
 
 AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, componentName, componentData) => {
   if (!el.object3DMap.mesh && el.object3DMap.group) {
@@ -801,15 +760,15 @@ AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, co
   });
   el.setAttribute("body-helper", {
     type: TYPE.KINEMATIC,
-    gravity: new THREE.Vector3(0,0,0),
+    gravity: new THREE.Vector3(0, 0, 0),
     mass: 5,
-    angularFactor: new THREE.Vector3(0,0,0),
-    linearFactor: new THREE.Vector3(0,1,1),
+    angularFactor: new THREE.Vector3(0, 0, 0),
+    linearFactor: new THREE.Vector3(0, 1, 1),
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
   });
   el.setAttribute("shape-helper", {
-    margin: 0,
+    margin: 0
   });
   el.setAttribute(componentName, componentData);
 });
@@ -834,7 +793,7 @@ AFRAME.GLTFModelPlus.registerComponent("portal", "portal", (el, componentName, c
   el.setAttribute("tags", {
     singleActionButton: true
   });
-  
+
   el.setAttribute(componentName, componentData);
 });
 
