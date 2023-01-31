@@ -638,7 +638,32 @@ AFRAME.GLTFModelPlus.registerComponent("earth-globe", "earth-globe", (el, compon
   el.setAttribute(componentName, { ...componentData, src: sanitizeUrl(componentData.src), text: targetEntity });
 });
 
-AFRAME.GLTFModelPlus.registerComponent("pipezania", "pipezania");
+AFRAME.GLTFModelPlus.registerComponent(
+  "pipezania",
+  "pipezania",
+  (el, componentName, componentData, components, indexToEntityMap) => {
+    const { unlock } = componentData;
+
+    let targetEntity;
+
+    try {
+      // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
+      if (typeof unlock === "number") {
+        targetEntity = indexToEntityMap[unlock];
+      } else {
+        targetEntity = unlock?.el;
+      }
+    } catch (e) {
+      console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
+      return;
+    }
+
+    el.setAttribute(componentName, {
+      ...componentData,
+      unlock: targetEntity
+    });
+  }
+);
 
 function findReferenceTarget(componentName, componentData, indexToEntityMap) {
   const { target } = componentData;
