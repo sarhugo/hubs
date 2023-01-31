@@ -12,11 +12,15 @@ import {
   ConnectPairs,
   ConnectPairsConnected,
   ConnectPairsInitialized,
+  ConnectPairsPuzzle,
   Rigidbody,
   Constraint,
   ConstraintRemoteLeft,
   ConstraintRemoteRight
 } from "../bit-components";
+
+const queryContentPairsPuzzle = defineQuery([ConnectPairsPuzzle]);
+const queryEnterContentPairsPuzzle = enterQuery(queryContentPairsPuzzle);
 
 const queryContentPairs = defineQuery([ConnectPairs]);
 const queryEnterContentPairs = enterQuery(queryContentPairs);
@@ -31,6 +35,9 @@ const queryExitRemoteRight = exitQuery(queryRemoteRight);
 const queryRemoteLeft = defineQuery([HeldRemoteLeft, ConnectPairs, Not(ConnectPairsConnected)]);
 const queryEnterRemoteLeft = enterQuery(queryRemoteLeft);
 const queryExitRemoteLeft = exitQuery(queryRemoteLeft);
+
+const queryConnected = defineQuery([ConnectPairs, ConnectPairsConnected]);
+const queryEnterConnected = enterQuery(queryConnected);
 
 const grabBodyOptions = { type: "dynamic", activationState: DISABLE_DEACTIVATION };
 const releaseBodyOptions = { activationState: ACTIVE_TAG };
@@ -58,6 +65,13 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
     });
     addComponent(world, Constraint, eid);
     addComponent(world, constraintComponent, eid);
+  }
+}
+
+function initializePuzzle(world, entities) {
+  for (let i = 0; i < entities.length; i++) {
+    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[entities[i]])
+    unlock.el.setAttribute("visible", false)
   }
 }
 
@@ -122,9 +136,19 @@ function findPairCollision(world, physicsSystem, entities) {
     }
   }
 }
+
+function isItFinished(world, puzzles, pairs, connections, justConnected) {
+  if (justConnected.length) return;
+  for (let i = 0; i < puzzles.length; i++) {
+    const unlock = world.eid2obj.get(ConnectPairsPuzzle.unlockRef[puzzles[i]])
+    unlock.el.setAttribute("visible", pairs.length == connections.length)
+  }
+}
+
 export function connectPairsSystem(world) {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   initialize(world, queryEnterContentPairs(world));
+  initializePuzzle(world, queryEnterContentPairsPuzzle(world));
   add(world, physicsSystem, anyEntityWith(world, RemoteRight), ConstraintRemoteRight, queryEnterRemoteRight(world));
   add(world, physicsSystem, anyEntityWith(world, RemoteLeft), ConstraintRemoteLeft, queryEnterRemoteLeft(world));
   findPairCollision(world, physicsSystem, queryRemoteRight(world));
@@ -145,4 +169,6 @@ export function connectPairsSystem(world) {
     anyEntityWith(world, RemoteLeft),
     queryExitRemoteLeft(world)
   );
+
+  isItFinished(world, queryContentPairsPuzzle(world), queryContentPairs(world), queryConnected(world), queryEnterConnected(world));
 }

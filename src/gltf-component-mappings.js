@@ -624,6 +624,7 @@ AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, co
   el.setAttribute("body-helper", {
     type: TYPE.KINEMATIC,
     gravity: new THREE.Vector3(0,0,0),
+    mass: 5,
     angularFactor: new THREE.Vector3(0,0,0),
     linearFactor: new THREE.Vector3(0,1,1),
     collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
@@ -633,4 +634,27 @@ AFRAME.GLTFModelPlus.registerComponent("connect-pairs", "connect-pairs", (el, co
     margin: 0,
   });
   el.setAttribute(componentName, componentData);
+});
+
+AFRAME.GLTFModelPlus.registerComponent("connect-pairs-puzzle", "connect-pairs-puzzle", (el, componentName, componentData, components, indexToEntityMap) => {
+  const { unlock } = componentData;
+
+  let targetEntity;
+
+  try {
+    // indexToEntityMap should be considered deprecated. These references are now resovled by the GLTFHubsComponentExtension
+    if (typeof unlock === "number") {
+      targetEntity = indexToEntityMap[unlock];
+    } else {
+      targetEntity = unlock?.el;
+    }
+  } catch (e) {
+    console.warn(`Error inflating gltf component "${componentName}": ${e.message}`);
+    return;
+  }
+  
+  el.setAttribute(componentName, {
+    ...componentData,
+    unlock: targetEntity
+  });
 });

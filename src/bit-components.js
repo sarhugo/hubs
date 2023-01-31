@@ -169,3 +169,7 @@ ConnectPairs.side[$isStringType] = true;
 
 export const ConnectPairsInitialized = defineComponent();
 export const ConnectPairsConnected = defineComponent();
+
+export const ConnectPairsPuzzle = defineComponent({
+  unlockRef: Types.eid
+});
