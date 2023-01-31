@@ -259,9 +259,11 @@ class Grid extends Mesh {
 
 AFRAME.registerComponent("pipezania", {
   schema: {
-    level: { type: "int" }
+    level: { type: "int" },
+    unlock: { type: "selector" }
   },
   init() {
+    this.data.unlock && this.data.unlock.setAttribute("visible", false);
     this.level = this.data.level ? LEVELS[this.data.level - 1] : LEVELS[Math.floor(Math.random() * LEVELS.length)];
     this.board = {};
     this.isFlowing = false;
@@ -403,6 +405,7 @@ AFRAME.registerComponent("pipezania", {
   success() {
     this.stopFlow();
     this.el.sceneEl.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SUCCESS);
+    this.data.unlock && this.data.unlock.setAttribute("visible", true);
     spawnEmojiInFrontOfUser(emojis.find(emoji => emoji.id === "clap"));
     this.finished = true;
   }
