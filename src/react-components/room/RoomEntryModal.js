@@ -37,7 +37,7 @@ export function RoomEntryModal({
     return (
       <FormattedMessage
         id="room-entry-modal.agb-accept"
-        defaultMessage="I confirm that I understand the legal note and disclaimer above and have taken note of and accept the above given terms of use and the privacy statement relating to the UBS website."
+        defaultMessage="I confirm that I understand the legal note and disclaimer above and have taken note of and accept the above given terms of use and the privacy statement relating to the website."
       />
     );
   };
