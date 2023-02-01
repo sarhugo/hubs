@@ -1,5 +1,9 @@
 @use "../styles/theme.scss";
 
+:local(.room-entry-modal) {
+  max-width: 566px;
+}
+
 :local(.content) {
   padding: 24px 8px;
 
@@ -39,14 +43,31 @@
   }
 }
 
-:local(.buttons) {
-  button {
-    margin-left: 16px;
-    margin-right: 16px;
+:local(.buttons-row) {
+  justify-content: center;
+}
 
-    @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
-      margin-left: 8px;
-      margin-right: 8px;
-    }
+:local(.buttons) {
+  .items {
+    justify-content: center;
   }
+
+  button {
+    margin: 8px;
+  }
+}
+
+:local(.terms-and-conditions) {
+  text-align: left;
+
+  p {
+    font-size: theme.$font-size-md;
+  }
+}
+
+:local(.terms-and-conditions-checkbox) {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  height: auto;
+  font-size: theme.$font-size-sm;
 }
