@@ -128,6 +128,7 @@ AFRAME.registerComponent("media-video", {
       this.updatePlaybackState();
     });
 
+    /*
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
@@ -155,6 +156,8 @@ AFRAME.registerComponent("media-video", {
         // Non-networked
         this.updatePlaybackState();
       });
+    */
+    this.updatePlaybackState();
 
     let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
     this.onPreferenceChanged = () => {
@@ -186,15 +189,19 @@ AFRAME.registerComponent("media-video", {
   },
 
   isMineOrLocal() {
-    return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
+    return true;
+    //return !this.el.components.networked || (this.networkedEl && NAF.utils.isMine(this.networkedEl));
   },
 
   ensureOwned() {
+    return true;
+    /*
     return (
       !this.el.components.networked ||
       (this.networkedEl && NAF.utils.isMine(this.networkedEl)) ||
       NAF.utils.takeOwnership(this.networkedEl)
     );
+    */
   },
 
   seekForward() {
