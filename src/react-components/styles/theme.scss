@@ -249,7 +249,8 @@ $overlay-border-color: var(--overlay-border-color);
 $overlay-outline-color: var(--overlay-outline-color);
 
 $toolbar-icon-color: var(--toolbar-icon-color);
-$toolbar-icon-selected-bg: var(--toolbar-icon-selected-bg);
+$toolbar-icon-selected-bg: var(--toolbar-icon-selected-bg, #fff);
+$toolbar-basic-icon-bg: rgba(231, 231, 231, 0.7);
 $toolbar-basic-icon-color: var(--toolbar-basic-icon-color);
 $toolbar-basic-selected-icon-color: var(--toolbar-basic-selected-icon-color);
 $toolbar-basic-color: var(--toolbar-basic-color);

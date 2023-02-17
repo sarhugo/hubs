@@ -166,7 +166,8 @@ class UIRoot extends Component {
     activeObject: PropTypes.object,
     selectedObject: PropTypes.object,
     breakpoint: PropTypes.string,
-    canVoiceChat: PropTypes.bool
+    canVoiceChat: PropTypes.bool,
+    canTextChat: PropTypes.bool
   };
 
   state = {
@@ -833,9 +834,11 @@ class UIRoot extends Component {
 
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
-              } else {
+              } else if (this.props.canVoiceChat) {
                 this.onRequestMicPermission();
                 this.pushHistoryState("entry_step", "audio");
+              } else {
+                this.onAudioReadyButton();
               }
             } else {
               this.handleForceEntry();
@@ -1071,9 +1074,11 @@ class UIRoot extends Component {
                   if (this.props.forcedVREntryType) {
                     this.pushHistoryState();
                     this.handleForceEntry();
-                  } else {
+                  } else if (this.props.canVoiceChat) {
                     this.onRequestMicPermission();
                     this.pushHistoryState("entry_step", "audio");
+                  } else {
+                    this.onAudioReadyButton();
                   }
                 }}
                 showBackButton
@@ -1157,7 +1162,7 @@ class UIRoot extends Component {
             icon: AvatarIcon,
             onClick: () => this.setSidebar("profile")
           },
-          {
+          /*{
             id: "favorite-rooms",
             label: <FormattedMessage id="more-menu.favorite-rooms" defaultMessage="Favorite Rooms" />,
             icon: FavoritesIcon,
@@ -1170,7 +1175,7 @@ class UIRoot extends Component {
                 },
                 SignInMessages.favoriteRooms
               )
-          },
+          },*/
           {
             id: "preferences",
             label: <FormattedMessage id="more-menu.preferences" defaultMessage="Preferences" />,
@@ -1183,7 +1188,7 @@ class UIRoot extends Component {
         id: "room",
         label: <FormattedMessage id="more-menu.room" defaultMessage="Room" />,
         items: [
-          {
+          isModerator && {
             id: "room-info",
             label: <FormattedMessage id="more-menu.room-info" defaultMessage="Room Info and Settings" />,
             icon: HomeIcon,
@@ -1196,7 +1201,7 @@ class UIRoot extends Component {
               icon: InviteIcon,
               onClick: () => this.props.scene.emit("action_invite")
             },
-          this.isFavorited()
+          /*this.isFavorited()
             ? {
                 id: "unfavorite-room",
                 label: <FormattedMessage id="more-menu.unfavorite-room" defaultMessage="Unfavorite Room" />,
@@ -1208,7 +1213,7 @@ class UIRoot extends Component {
                 label: <FormattedMessage id="more-menu.favorite-room" defaultMessage="Favorite Room" />,
                 icon: StarOutlineIcon,
                 onClick: () => this.toggleFavorited()
-              },
+              },*/
           isModerator &&
             entered && {
               id: "streamer-mode",
@@ -1594,7 +1599,7 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <AudioPopoverContainer scene={this.props.scene} />
+                        {this.props.canVoiceChat && <AudioPopoverContainer scene={this.props.scene} />}
                         <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                         <PlacePopoverContainer
                           scene={this.props.scene}
@@ -1610,9 +1615,11 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ChatToolbarButtonContainer
-                      onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
-                    />
+                    {this.props.canTextChat && (
+                      <ChatToolbarButtonContainer
+                        onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                      />
+                    )}
                     {entered && isMobileVR && (
                       <ToolbarButton
                         className={styleUtils.hideLg}
@@ -1662,7 +1669,7 @@ class UIRoot extends Component {
 function UIRootHooksWrapper(props) {
   useAccessibleOutlineStyle();
   const breakpoint = useCssBreakpoints();
-  const { voice_chat: canVoiceChat } = usePermissions();
+  const { voice_chat: canVoiceChat, text_chat: canTextChat } = usePermissions();
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
@@ -1686,7 +1693,7 @@ function UIRootHooksWrapper(props) {
   return (
     <ChatContextProvider messageDispatch={props.messageDispatch}>
       <ObjectListProvider scene={props.scene}>
-        <UIRoot breakpoint={breakpoint} {...props} canVoiceChat={canVoiceChat} />
+        <UIRoot breakpoint={breakpoint} {...props} canVoiceChat={canVoiceChat} canTextChat={canTextChat} />
       </ObjectListProvider>
     </ChatContextProvider>
   );

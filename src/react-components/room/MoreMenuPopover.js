@@ -65,9 +65,11 @@ function MoreMenuPopoverContent({ menu, closePopover }) {
   return (
     <div className={styles.moreMenuPopover}>
       <ul>
-        {menu.map(group => (
-          <MoreMenuGroup key={group.id} group={group} closePopover={closePopover} />
-        ))}
+        {menu
+          .filter(group => group.items.length)
+          .map(group => (
+            <MoreMenuGroup key={group.id} group={group} closePopover={closePopover} />
+          ))}
       </ul>
     </div>
   );
