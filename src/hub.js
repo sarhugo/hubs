@@ -41,7 +41,7 @@ patchWebGLRenderingContext();
 
 import "networked-aframe/src/index";
 import "webrtc-adapter";
-import { detectOS, detect } from "detect-browser";
+//import { detectOS, detect } from "detect-browser";
 import {
   getReticulumFetchUrl,
   getReticulumMeta,
@@ -686,6 +686,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
+  /*
   const detectedOS = detectOS(navigator.userAgent);
   const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
@@ -698,6 +699,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
   }
+  */
 
   const hubId = getCurrentHubId();
   console.log(`Hub ID: ${hubId}`);
