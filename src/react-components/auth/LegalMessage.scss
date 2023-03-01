@@ -1,0 +1,27 @@
+@use "../styles/theme.scss";
+
+:local(.accordion) {
+  text-align: left;
+}
+
+:local(.title) {
+  h3 {
+    color: theme.$accent1-color;
+    cursor: pointer;
+    border-bottom: 1px solid theme.$border1-color;
+    padding: 5px;
+    font-size: theme.$font-size-md;
+    font-weight: theme.$font-weight-bold;
+  }
+}
+
+:local(.body) {
+  padding: 10px;
+  max-height: 30vh;
+  overflow: auto;
+
+  p {
+    font-size: theme.$font-size-sm;
+    margin-bottom: 10px;
+  }
+}

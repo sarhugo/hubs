@@ -15,6 +15,9 @@ import { Column } from "../layout/Column";
 import { Row } from "../layout/Row";
 import { AppLogo } from "../misc/AppLogo";
 import { FormattedMessage } from "react-intl";
+import { LegalMessage } from "../auth/LegalMessage";
+import { TERMS, PRIVACY } from "../../constants";
+import configs from "../../utils/configs";
 
 export function RoomEntryModal({
   className,
@@ -37,10 +40,13 @@ export function RoomEntryModal({
     return (
       <FormattedMessage
         id="room-entry-modal.agb-accept"
-        defaultMessage="I confirm that I understand the legal note and disclaimer above and have taken note of and accept the above given terms of use and the privacy statement relating to the website."
+        defaultMessage="I confirm that I understand the legal note and risks outlined, and acknowledge and accept the website terms of use and data privacy policy."
       />
     );
   };
+
+  const termsUrl = configs.link("terms_of_use", TERMS);
+  const privacyUrl = configs.link("privacy_notice", PRIVACY);
 
   const breakpoint = useCssBreakpoints();
   return (
@@ -52,12 +58,6 @@ export function RoomEntryModal({
           </div>
         )}
         <div className={styles.termsAndConditions}>
-          <FormattedMessage
-            id="room-entry-modal.agb-text"
-            defaultMessage="<b>Terms and condit...:</b> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquet magna eu erat bibendum, vehicula pharetra tortor ullamcorper. Morbi vel eleifend ante. Fusce aliquet ullamcorper porta. Ut non gravida nulla. Maecenas iaculis metus quis metus elementum, sit amet elementum ligula lobortis. Pellentesque imperdiet vitae justo sed accumsan. Fusce mollis egestas dui ut luctus."
-            tagName="p"
-            values={{ b: chunks => <b>{chunks}</b> }}
-          />
           <CheckboxInput
             tabIndex="0"
             type="checkbox"
@@ -66,6 +66,7 @@ export function RoomEntryModal({
             onChange={onAcceptTerms}
             className={styles.termsAndConditionsCheckbox}
           />
+          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
         </div>
         <Row className={styles.buttons} flexClassName={styles.buttonsRow}>
           {showJoinRoom && (

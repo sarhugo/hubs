@@ -58,17 +58,10 @@
   }
 }
 
-:local(.terms-and-conditions) {
-  text-align: left;
-
-  p {
-    font-size: theme.$font-size-md;
-  }
-}
-
 :local(.terms-and-conditions-checkbox) {
   margin-top: 8px;
   margin-bottom: 8px;
   height: auto;
-  font-size: theme.$font-size-sm;
+  font-size: theme.$font-size-xs;
+  text-align: left;
 }
