@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from "react";
 import PropTypes from "prop-types";
 import { FormattedMessage } from "react-intl";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons/faChevronDown";
 import styles from "./LegalMessage.scss";
 
 export function LegalMessage({ termsUrl, privacyUrl }) {
@@ -41,6 +43,7 @@ export function LegalMessage({ termsUrl, privacyUrl }) {
       <div className={styles.accordion_item}>
         <div onClick={() => toggleElement("tos")} className={styles.title}>
           <FormattedMessage id="legal-message.tos-note-title" defaultMessage="Legal Note" tagName="h3" />
+          <FontAwesomeIcon icon={faChevronDown} className={showTos ? "open" : "closed"} />
         </div>
         {showTos && (
           <div className={styles.body}>
@@ -64,6 +67,7 @@ export function LegalMessage({ termsUrl, privacyUrl }) {
             defaultMessage="Privacy Disclaimer"
             tagName="h3"
           />
+          <FontAwesomeIcon icon={faChevronDown} className={showPrivacy ? "open" : "closed"} />
         </div>
         {showPrivacy && (
           <div className={styles.body}>

@@ -58,6 +58,7 @@ export function RoomEntryModal({
           </div>
         )}
         <div className={styles.termsAndConditions}>
+          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
           <CheckboxInput
             tabIndex="0"
             type="checkbox"
@@ -66,7 +67,6 @@ export function RoomEntryModal({
             onChange={onAcceptTerms}
             className={styles.termsAndConditionsCheckbox}
           />
-          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
         </div>
         <Row className={styles.buttons} flexClassName={styles.buttonsRow}>
           {showJoinRoom && (

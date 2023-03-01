@@ -5,13 +5,26 @@
 }
 
 :local(.title) {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid theme.$border1-color;
+  padding: 10px 5px;
+  cursor: pointer;
+
   h3 {
-    color: theme.$accent1-color;
-    cursor: pointer;
-    border-bottom: 1px solid theme.$border1-color;
-    padding: 5px;
+    color: theme.$text2-color;
     font-size: theme.$font-size-md;
     font-weight: theme.$font-weight-bold;
+  }
+
+  .svg-inline--fa {
+    transition: all ease .2s;
+  }
+
+  .svg-inline--fa.open {
+    transform: rotate(180deg);
+    transform-origin: center;
   }
 }
 
