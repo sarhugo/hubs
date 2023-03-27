@@ -40,7 +40,7 @@ export function RoomEntryModal({
     return (
       <FormattedMessage
         id="room-entry-modal.agb-accept"
-        defaultMessage="I confirm that I understand the legal note and risks outlined, and acknowledge and accept the website terms of use and data privacy policy."
+        defaultMessage="I confirm that I understand the legal note and risks outlined, and consent to the processing of my Personal Data as outlined above. I acknowledge and accept the website terms of use and data privacy policy."
       />
     );
   };
