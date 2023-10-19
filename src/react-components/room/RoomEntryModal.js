@@ -28,8 +28,8 @@ export function RoomEntryModal({
   onEnterOnDevice,
   showSpectate,
   onSpectate,
-  showOptions,
-  onOptions,
+  showRoomSettings,
+  onRoomSettings,
   ...rest
 }) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -52,11 +52,7 @@ export function RoomEntryModal({
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>
-        {breakpoint !== "sm" && breakpoint !== "md" && (
-          <div className={styles.logoContainer}>
-            <AppLogo />
-          </div>
-        )}
+        {breakpoint !== "sm" && breakpoint !== "md" && <AppLogo className={styles.logo} />}
         <div className={styles.termsAndConditions}>
           <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
           <CheckboxInput
@@ -93,13 +89,13 @@ export function RoomEntryModal({
               </span>
             </Button>
           )}
-          {showOptions && breakpoint !== "sm" && (
+          {showRoomSettings && breakpoint !== "sm" && (
             <>
               <hr className={styleUtils.showLg} />
-              <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
+              <Button preset="transparent" className={styleUtils.showLg} onClick={onRoomSettings}>
                 <SettingsIcon />
                 <span>
-                  <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
+                  <FormattedMessage id="room-entry-modal.room-settings-button" defaultMessage="Room Settings" />
                 </span>
               </Button>
             </>
@@ -119,13 +115,13 @@ RoomEntryModal.propTypes = {
   onEnterOnDevice: PropTypes.func,
   showSpectate: PropTypes.bool,
   onSpectate: PropTypes.func,
-  showOptions: PropTypes.bool,
-  onOptions: PropTypes.func
+  showRoomSettings: PropTypes.bool,
+  onRoomSettings: PropTypes.func
 };
 
 RoomEntryModal.defaultProps = {
   showJoinRoom: true,
   showEnterOnDevice: true,
   showSpectate: true,
-  showOptions: true
+  showRoomSettings: true
 };

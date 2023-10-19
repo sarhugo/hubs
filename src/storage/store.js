@@ -63,8 +63,9 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
+        displayName: { type: "string", pattern: "^[A-Za-z0-9_~\\s\\-]{3,32}$" },
         avatarId: { type: "string" },
+        pronouns: { type: "string", pattern: "^([a-zA-Z]{1,32}\\/){0,4}[a-zA-Z]{1,32}$" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }
@@ -84,7 +85,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         hasFoundFreeze: { type: "boolean" },
-        hasChangedName: { type: "boolean" },
+        hasChangedNameOrPronouns: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
@@ -126,7 +127,7 @@ export const SCHEMA = {
         showFPSCounter: { type: "bool", default: false },
         allowMultipleHubsInstances: { type: "bool", default: false },
         disableIdleDetection: { type: "bool", default: false },
-        fastRoomSwitching: { type: "bool", default: true },
+        fastRoomSwitching: { type: "bool", default: true }, // No longer used. TODO How to remove this safely?
         lazyLoadSceneMedia: { type: "bool", default: false },
         preferMobileObjectInfoPanel: { type: "bool", default: false },
         // if unset, maxResolution = screen resolution
@@ -294,6 +295,7 @@ export default class Store extends EventTarget {
           this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
         }
         previous = current;
+        console.log("Theme updated to: ", current);
       };
     })();
     this.addEventListener("statechanged", maybeDispatchThemeChanged);
@@ -318,7 +320,7 @@ export default class Store extends EventTarget {
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName) {
+    if (!this.state.activity.hasChangedNameOrPronouns) {
       this.update({ profile: { displayName: generateRandomName() } });
     }
   };

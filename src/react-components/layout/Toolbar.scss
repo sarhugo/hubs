@@ -1,4 +1,4 @@
-@use '../styles/theme';
+@use "../styles/theme";
 
 :local(.toolbar) {
   height: 96px;
@@ -20,6 +20,8 @@
   display: flex;
   flex: 1;
   justify-content: space-around;
+  align-items: center;
+  gap: 0 24px;
 
   @media (min-width: theme.$breakpoint-lg) {
     flex: 0;
@@ -31,5 +33,20 @@
     &:last-child {
       margin-right: 0px;
     }
+  }
+}
+
+:local(.center_content) {
+  position: absolute;
+  display: flex;
+  width: calc(100% - 48px);
+  justify-content: center;
+  z-index: -1;
+
+  @media (max-width: theme.$breakpoint-lg) {
+    width: 100%;
+    position: relative;
+    justify-content: space-around;
+    gap: unset;
   }
 }

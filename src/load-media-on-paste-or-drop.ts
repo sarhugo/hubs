@@ -1,9 +1,10 @@
-import { createNetworkedEntity } from "./utils/create-networked-entity";
+import { createNetworkedMedia } from "./utils/create-networked-entity";
 import { upload, parseURL } from "./utils/media-utils";
 import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";
 import { Vector3 } from "three";
 import qsTruthy from "./utils/qs_truthy";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 
 type UploadResponse = {
   file_id: string;
@@ -15,7 +16,7 @@ type UploadResponse = {
   origin: string;
 };
 
-function spawnFromUrl(text: string) {
+export function spawnFromUrl(text: string) {
   if (!text) {
     return;
   }
@@ -23,10 +24,10 @@ function spawnFromUrl(text: string) {
     console.warn(`Could not parse URL. Ignoring pasted text:\n${text}`);
     return;
   }
-  const eid = createNetworkedEntity(APP.world, "media", {
+  const eid = createNetworkedMedia(APP.world, {
     src: text,
     recenter: true,
-    resize: true,
+    resize: !qsTruthy("noResize"),
     animateLoad: true,
     isObjectMenuTarget: true
   });
@@ -36,7 +37,7 @@ function spawnFromUrl(text: string) {
   obj.lookAt(avatarPov.getWorldPosition(new Vector3()));
 }
 
-async function spawnFromFileList(files: FileList) {
+export async function spawnFromFileList(files: FileList) {
   for (const file of files) {
     const desiredContentType = file.type || guessContentType(file.name);
     const params = await upload(file, desiredContentType)
@@ -49,8 +50,9 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: srcUrl.href,
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
+          fileId: response.file_id,
           isObjectMenuTarget: true
         };
       })
@@ -59,13 +61,13 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: "error",
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
           isObjectMenuTarget: true
         };
       });
 
-    const eid = createNetworkedEntity(APP.world, "media", params);
+    const eid = createNetworkedMedia(APP.world, params);
     const avatarPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
     const obj = APP.world.eid2obj.get(eid)!;
     obj.position.copy(avatarPov.localToWorld(new Vector3(0, 0, -1.5)));
@@ -74,6 +76,7 @@ async function spawnFromFileList(files: FileList) {
 }
 
 async function onPaste(e: ClipboardEvent) {
+  if (!shouldUseNewLoader()) return;
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
@@ -94,23 +97,34 @@ async function onPaste(e: ClipboardEvent) {
   spawnFromUrl(text);
 }
 
+let lastDebugScene: string;
 function onDrop(e: DragEvent) {
+  if (!shouldUseNewLoader()) return;
+
+  e.preventDefault();
+
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
+
+  if (qsTruthy("debugLocalScene")) {
+    URL.revokeObjectURL(lastDebugScene);
+    if (!e.dataTransfer?.files.length) return;
+    const url = URL.createObjectURL(e.dataTransfer.files[0]);
+    APP.hubChannel!.updateScene(url);
+    lastDebugScene = url;
+    return;
+  }
+
   const files = e.dataTransfer?.files;
   if (files && files.length) {
-    e.preventDefault();
     return spawnFromFileList(files);
   }
   const url = e.dataTransfer?.getData("url") || e.dataTransfer?.getData("text");
   if (url) {
-    e.preventDefault();
     return spawnFromUrl(url);
   }
 }
 
-if (qsTruthy("newLoader")) {
-  document.addEventListener("paste", onPaste);
-  document.addEventListener("drop", onDrop);
-}
+document.addEventListener("paste", onPaste);
+document.addEventListener("drop", onDrop);

@@ -5,10 +5,12 @@ import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
+  EntityStateDirty,
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
   MediaVideo,
+  MediaVideoData,
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem
@@ -20,6 +22,7 @@ import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
+import { Emitter2Audio } from "./audio-emitter-system";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
@@ -80,23 +83,27 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const videoEid = VideoMenu.videoRef[eid];
     if (!videoEid) return;
     const menuObj = world.eid2obj.get(eid)!;
-    const video = (world.eid2obj.get(videoEid) as any).material.map.image as HTMLVideoElement;
+    const video = MediaVideoData.get(videoEid)!;
     const togglePlayVideo = userinput.get(paths.actions.cursor.right.togglePlayVideo);
     if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
 
       const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
       const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
 
+      const audioEid = Emitter2Audio.get(videoEid)!;
       if (video.paused) {
         video.play();
+        APP.isAudioPaused.delete(audioEid);
         playIndicatorObj.visible = true;
         pauseIndicatorObj.visible = false;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
       } else {
         video.pause();
+        APP.isAudioPaused.add(audioEid);
         playIndicatorObj.visible = false;
         pauseIndicatorObj.visible = true;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
@@ -122,14 +129,22 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       }
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);
     headObj.matrixNeedsUpdate = true;
 
-    const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
-    timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
-    timeLabelRef.sync();
+    const ratio = MediaVideo.ratio[videoEid];
+
+    const timeLabel = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
+    timeLabel.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
+    timeLabel.position.setY(ratio / 2 - 0.02);
+    timeLabel.matrixNeedsUpdate = true;
+
+    const slider = world.eid2obj.get(VideoMenu.sliderRef[eid])!;
+    slider.position.setY(-(ratio / 2) + 0.025);
+    slider.matrixNeedsUpdate = true;
 
     if (rightMenuIndicatorCoroutine && rightMenuIndicatorCoroutine().done) {
       rightMenuIndicatorCoroutine = null;
