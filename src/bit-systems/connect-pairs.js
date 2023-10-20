@@ -60,13 +60,13 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
     const toInitialize = queryToInitialize(world).filter(x => !entities.includes(x));
     for (let i = 0; i < toInitialize.length; i++) {
       const eid = findAncestorEntity(world, toInitialize[i], ancestor => hasComponent(world, Rigidbody, ancestor));
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], { type: "dynamic" });
+      physicsSystem.updateRigidBodyOptions(eid, { type: "dynamic" });
       addComponent(world, ConnectPairsInitialized, eid);
     }
   }
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
+    physicsSystem.updateRigidBodyOptions(eid, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {
       type: "pointToPoint",
       pivot: new THREE.Vector3(0, 0, 0),
@@ -100,7 +100,7 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
+      physicsSystem.updateRigidBodyOptions(eid, releaseBodyOptions);
       physicsSystem.removeConstraint(interactor);
       removeComponent(world, constraintComponent, eid);
       if (!hasComponent(world, ConstraintRemoteLeft, eid) && !hasComponent(world, ConstraintRemoteRight, eid)) {
@@ -140,8 +140,8 @@ function findPairCollision(world, physicsSystem, entities) {
         if (objEdge.distanceTo(targetEdge) < PIECE_SNAP) {
           target.position.copy(objEdge);
           target.matrixNeedsUpdate = true;
-          physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], connectedBodyOptions);
-          physicsSystem.updateBodyOptions(Rigidbody.bodyId[collisions[j]], connectedBodyOptions);
+          physicsSystem.updateRigidBodyOptions(eid, connectedBodyOptions);
+          physicsSystem.updateRigidBodyOptions(collisions[j], connectedBodyOptions);
           addComponent(world, ConnectPairsConnected, eid);
           addComponent(world, ConnectPairsConnected, collisions[j]);
           spawnEmojiInFrontOfUser(emojis.find(emoji => emoji.id === "clap"));
